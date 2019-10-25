@@ -1,5 +1,6 @@
 package com.rotunomp.listener;
 
+import com.rotunomp.apiWrappers.PokemonApiWrapper;
 import com.rotunomp.operations.FunctionName;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -68,6 +69,9 @@ public class CommandListener extends ListenerAdapter {
                     break;
                 case POKEMON:
                     String pokemonName = splitCommand[1];
+                    PokemonApiWrapper pokemonApiWrapper = new PokemonApiWrapper();
+                    channel.sendMessage(pokemonApiWrapper.getPokemonTypes(pokemonName)).queue();
+                    channel.sendMessage(pokemonApiWrapper.getFlavorText(pokemonName)).queue();
                     break;
                 default:
                     channel.sendMessage("Command Error").queue();
