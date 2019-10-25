@@ -4,7 +4,8 @@ public enum FunctionName {
     PING ("!ping"),
     ADD_ROLE ("!add-role"),
     REMOVE_ROLE ("!remove-role"),
-    POKEMON ("!pokemon");
+    POKEMON ("!pokemon"),
+    SPOTIFY ("!spotify");
 
     public final String command;
 
