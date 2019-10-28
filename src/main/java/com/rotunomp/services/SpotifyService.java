@@ -20,8 +20,18 @@ import java.util.List;
 public class SpotifyService {
 
     private Api api;
+    // This class is going to be a singleton
+    private static SpotifyService serviceInstance;
 
-    public SpotifyService() {
+    // Returns the singleton
+    public static SpotifyService getService() {
+        if (serviceInstance == null) {
+            serviceInstance = new SpotifyService();
+        }
+        return serviceInstance;
+    }
+
+    private SpotifyService() {
         api = Api.builder()
                 .clientId("98963ec74fd1458abc45cd519d4494de")
                 .clientSecret("642709c5fff04a0cab477b7aecbcf158")
@@ -65,12 +75,11 @@ public class SpotifyService {
         return "Cannot find album: " + albumId;
     }
 
-    public List<Artist> searchArtistsByName(String artistName) throws ArtistNotFoundException, IOException {
+    private List<Artist> searchArtistsByName(String artistName) throws ArtistNotFoundException, IOException {
         // Make the request, we'd only ever need to get the first three artists
         ArtistSearchRequest request = api.searchArtists(artistName).limit(3).build();
         try {
-            List<Artist> searchResult = request.get().getItems();
-            return searchResult;
+            return request.get().getItems();
         } catch (WebApiException e) {
             throw new ArtistNotFoundException();
         }

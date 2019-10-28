@@ -23,7 +23,7 @@ public class CommandListener extends ListenerAdapter {
         };
 
         // Instantiate all the services
-        spotifyService = new SpotifyService();
+        spotifyService = SpotifyService.getService();
     }
 
     @Override
@@ -93,7 +93,7 @@ public class CommandListener extends ListenerAdapter {
                                     spotifyService.getArtistsStringByName(str.toString())).queue();
                             break;
                         default:
-                            channel.sendMessage("Usage: !spotify album/artist <id>").queue();
+                            channel.sendMessage("Usage: !spotify album/artist <id/name>").queue();
                     }
                     break;
                 default:
