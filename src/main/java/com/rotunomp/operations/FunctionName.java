@@ -7,6 +7,7 @@ public enum FunctionName {
     POKEMON_TYPE ("!pokemon type"),
     POKEMON_INFO ("!pokemon info");
 
+
     public final String command;
 
     FunctionName(String command) {

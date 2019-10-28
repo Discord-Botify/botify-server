@@ -2,6 +2,7 @@ package com.rotunomp.listener;
 
 import com.rotunomp.apiWrappers.PokemonApiWrapper;
 import com.rotunomp.operations.FunctionName;
+import com.rotunomp.services.SpotifyService;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -11,6 +12,7 @@ import java.util.HashMap;
 public class CommandListener extends ListenerAdapter {
 
     private HashMap<String, FunctionName> functionNameHashMap;
+    private SpotifyService spotifyService;
 
     public CommandListener() {
         functionNameHashMap = new HashMap<>();
@@ -19,6 +21,9 @@ public class CommandListener extends ListenerAdapter {
         for (FunctionName e : FunctionName.class.getEnumConstants()) {
             functionNameHashMap.put(e.command, e);
         };
+
+        // Instantiate all the services
+        spotifyService = SpotifyService.getService();
     }
 
     @Override
@@ -72,6 +77,24 @@ public class CommandListener extends ListenerAdapter {
                     PokemonApiWrapper pokemonApiWrapper = new PokemonApiWrapper();
                     channel.sendMessage(pokemonApiWrapper.getPokemonTypes(pokemonName)).queue();
                     channel.sendMessage(pokemonApiWrapper.getFlavorText(pokemonName)).queue();
+                    break;
+                case SPOTIFY:
+                    switch (splitCommand[1]) {
+                        case "album":
+                            channel.sendMessage(spotifyService.getAlbumName(splitCommand[2])).queue();
+                            break;
+                        case "artist":
+                            StringBuilder str = new StringBuilder();
+                            // Loop over all remaining text in the command
+                            for (int i = 2; i < splitCommand.length; i++) {
+                                str.append(splitCommand[i]).append(" ");
+                            }
+                            channel.sendMessage(
+                                    spotifyService.getArtistsStringByName(str.toString())).queue();
+                            break;
+                        default:
+                            channel.sendMessage("Usage: !spotify album/artist <id/name>").queue();
+                    }
                     break;
                 default:
                     channel.sendMessage("Command Error").queue();
