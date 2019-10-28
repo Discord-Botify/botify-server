@@ -7,6 +7,7 @@ public enum FunctionName {
     POKEMON ("!pokemon"),
     SPOTIFY ("!spotify");
 
+
     public final String command;
 
     FunctionName(String command) {
