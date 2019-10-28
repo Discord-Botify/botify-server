@@ -3,11 +3,19 @@ package com.rotunomp.services;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
+import com.rotunomp.exceptions.ArtistNotFoundException;
 import com.wrapper.spotify.Api;
+import com.wrapper.spotify.exceptions.WebApiException;
 import com.wrapper.spotify.methods.AlbumRequest;
+import com.wrapper.spotify.methods.ArtistSearchRequest;
 import com.wrapper.spotify.methods.authentication.ClientCredentialsGrantRequest;
 import com.wrapper.spotify.models.Album;
+import com.wrapper.spotify.models.Artist;
 import com.wrapper.spotify.models.ClientCredentials;
+import com.wrapper.spotify.models.Page;
+
+import java.io.IOException;
+import java.util.List;
 
 public class SpotifyService {
 
@@ -55,6 +63,43 @@ public class SpotifyService {
         }
 
         return "Cannot find album: " + albumId;
+    }
+
+    public List<Artist> searchArtistsByName(String artistName) throws ArtistNotFoundException, IOException {
+        // Make the request, we'd only ever need to get the first three artists
+        ArtistSearchRequest request = api.searchArtists(artistName).limit(3).build();
+        try {
+            List<Artist> searchResult = request.get().getItems();
+            return searchResult;
+        } catch (WebApiException e) {
+            throw new ArtistNotFoundException();
+        }
+    }
+
+    public String getArtistsStringByName(String artistName) {
+        try {
+            List<Artist> artists = searchArtistsByName(artistName);
+            if (artists.size() == 0) {
+                return "No results for " + artistName;
+            }
+
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("Search Results for ").append(artistName).append(": \n");
+            for (Artist artist : artists) {
+                stringBuilder.append(artist.getName())
+                        .append(" | ID: ")
+                        .append(artist.getId())
+                        .append("\n");
+            }
+            return stringBuilder.toString();
+
+        } catch (ArtistNotFoundException e) {
+            e.printStackTrace();
+            return "Could not find the specified artist";
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "Something went wrong. Try again later!";
+        }
     }
 
 }

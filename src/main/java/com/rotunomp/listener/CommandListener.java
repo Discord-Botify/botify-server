@@ -83,6 +83,15 @@ public class CommandListener extends ListenerAdapter {
                         case "album":
                             channel.sendMessage(spotifyService.getAlbumName(splitCommand[2])).queue();
                             break;
+                        case "artist":
+                            StringBuilder str = new StringBuilder();
+                            // Loop over all remaining text in the command
+                            for (int i = 2; i < splitCommand.length; i++) {
+                                str.append(splitCommand[i]).append(" ");
+                            }
+                            channel.sendMessage(
+                                    spotifyService.getArtistsStringByName(str.toString())).queue();
+                            break;
                         default:
                             channel.sendMessage("Usage: !spotify album/artist <id>").queue();
                     }
