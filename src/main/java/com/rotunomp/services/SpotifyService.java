@@ -3,6 +3,7 @@ package com.rotunomp.services;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
+import com.rotunomp.app.Properties;
 import com.rotunomp.exceptions.ArtistNotFoundException;
 import com.wrapper.spotify.Api;
 import com.wrapper.spotify.exceptions.WebApiException;
@@ -33,8 +34,8 @@ public class SpotifyService {
 
     private SpotifyService() {
         api = Api.builder()
-                .clientId("98963ec74fd1458abc45cd519d4494de")
-                .clientSecret("642709c5fff04a0cab477b7aecbcf158")
+                .clientId(Properties.get("spotify_client_id"))
+                .clientSecret(Properties.get("spotify_client_secret"))
                 .build();
         /* Create a request object. */
         final ClientCredentialsGrantRequest request = api.clientCredentialsGrant().build();
