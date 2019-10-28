@@ -72,7 +72,7 @@ public class CommandListener extends ListenerAdapter {
                     guild.addRoleToMember(member, role).queue();
                     channel.sendMessage(member.getUser().getAsMention() + " was added to role " + role.getAsMention()).queue();
                     break;
-                case POKEMON_INFO:
+                case POKEMON:
                     String pokemonName = splitCommand[1];
                     PokemonApiWrapper pokemonApiWrapper = new PokemonApiWrapper();
                     channel.sendMessage(pokemonApiWrapper.getPokemonTypes(pokemonName)).queue();
