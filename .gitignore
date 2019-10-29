@@ -1,4 +1,5 @@
 .idea/**
 config.properties
+src/main/resources/hibernate.properties
 
 target/**

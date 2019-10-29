@@ -1,35 +1,35 @@
 package com.rotunomp.listener;
 
-import com.rotunomp.apiWrappers.PokemonApiWrapper;
 import com.rotunomp.operations.FunctionName;
 import com.rotunomp.services.SpotifyService;
+import com.wrapper.spotify.models.SimpleAlbum;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 import java.util.HashMap;
+import java.util.List;
 
-public class CommandListener extends ListenerAdapter {
+public class PrivateListener extends ListenerAdapter {
 
     private HashMap<String, FunctionName> functionNameHashMap;
     private SpotifyService spotifyService;
 
-    public CommandListener() {
+    public PrivateListener() {
         functionNameHashMap = new HashMap<>();
         // Iterate through all the enums and put them into our hashmap
         // HashMap is String command => FunctionName
         for (FunctionName e : FunctionName.class.getEnumConstants()) {
             functionNameHashMap.put(e.command, e);
-        };
+        }
 
         // Instantiate all the services
         spotifyService = SpotifyService.getService();
     }
 
     @Override
-    public void onMessageReceived(MessageReceivedEvent event) {
-        // Right away ignore all messages from bots
-        if(event.getAuthor().isBot()) {
+    public void onPrivateMessageReceived(PrivateMessageReceivedEvent event) {
+        if (event.getAuthor().isBot()) {
             return;
         }
 
@@ -50,38 +50,15 @@ public class CommandListener extends ListenerAdapter {
         Role role;
         Guild guild;
 
-        System.out.println("Trying to execute command " + command + "...");
-        // !add-role user role
-
-        if(functionNameHashMap.containsKey(command)) {
+        if (functionNameHashMap.containsKey(command)) {
+            System.out.println("Trying to execute command " + command + "...");
             switch (functionNameHashMap.get(command)) {  // Gets the FunctionName Enum
-                case PING:
-                    channel.sendMessage("Pong!").queue();
-                    break;
-                case REMOVE_ROLE:
-                    member = message.getMentionedMembers().get(0);
-                    role = message.getMentionedRoles().get(0);
-                    guild = event.getGuild();
-                    guild.removeRoleFromMember(member, role).queue();
-                    channel.sendMessage(member.getUser().getAsMention() + " was removed from role " + role.getAsMention()).queue();
-                    break;
-                case ADD_ROLE:
-                    member = message.getMentionedMembers().get(0);
-                    role = message.getMentionedRoles().get(0);
-                    guild = event.getGuild();
-                    guild.addRoleToMember(member, role).queue();
-                    channel.sendMessage(member.getUser().getAsMention() + " was added to role " + role.getAsMention()).queue();
-                    break;
-                case POKEMON:
-                    String pokemonName = splitCommand[1];
-                    PokemonApiWrapper pokemonApiWrapper = new PokemonApiWrapper();
-                    channel.sendMessage(pokemonApiWrapper.getPokemonTypes(pokemonName)).queue();
-                    channel.sendMessage(pokemonApiWrapper.getFlavorText(pokemonName)).queue();
-                    break;
                 case SPOTIFY:
                     switch (splitCommand[1]) {
                         case "album":
-                            channel.sendMessage(spotifyService.getAlbumName(splitCommand[2])).queue();
+                            channel.sendMessage(
+                                    spotifyService.getAlbumNameById(splitCommand[2])
+                            ).queue();
                             break;
                         case "artist":
                             StringBuilder str = new StringBuilder();
@@ -90,19 +67,25 @@ public class CommandListener extends ListenerAdapter {
                                 str.append(splitCommand[i]).append(" ");
                             }
                             channel.sendMessage(
-                                    spotifyService.getArtistsStringByName(str.toString())).queue();
+                                    spotifyService.getArtistsStringByName(str.toString()))
+                                    .queue();
+                            break;
+                        case "albums":
+                            List<SimpleAlbum> albums = spotifyService.getArtistsAlbums(splitCommand[2]);
+                            for (SimpleAlbum album : albums) {
+                                System.out.println(album.toString());
+                            }
+                            break;
+                        case "follow":
                             break;
                         default:
                             channel.sendMessage("Usage: !spotify album/artist <id/name>").queue();
+                            break;
                     }
-                    break;
-                default:
-                    channel.sendMessage("Command Error").queue();
-                    break;
-
             }
         }
 
     }
+
 
 }

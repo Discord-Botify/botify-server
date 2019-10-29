@@ -5,17 +5,22 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
 import com.rotunomp.app.Properties;
 import com.rotunomp.exceptions.ArtistNotFoundException;
+import com.rotunomp.models.FollowedArtist;
+import com.rotunomp.models.SpotifyUser;
 import com.wrapper.spotify.Api;
 import com.wrapper.spotify.exceptions.WebApiException;
-import com.wrapper.spotify.methods.AlbumRequest;
-import com.wrapper.spotify.methods.ArtistSearchRequest;
+import com.wrapper.spotify.methods.*;
 import com.wrapper.spotify.methods.authentication.ClientCredentialsGrantRequest;
-import com.wrapper.spotify.models.Album;
-import com.wrapper.spotify.models.Artist;
-import com.wrapper.spotify.models.ClientCredentials;
-import com.wrapper.spotify.models.Page;
+import com.wrapper.spotify.models.*;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistry;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
 public class SpotifyService {
@@ -23,6 +28,7 @@ public class SpotifyService {
     private Api api;
     // This class is going to be a singleton
     private static SpotifyService serviceInstance;
+    private SessionFactory sessionFactory;
 
     // Returns the singleton
     public static SpotifyService getService() {
@@ -62,9 +68,20 @@ public class SpotifyService {
                 /* An error occurred while getting the access token. This is probably caused by the client id or * client secret is invalid. */
             }
         });
+
+        // Set up the Hibernate environment
+        Configuration configuration = new Configuration();
+        configuration.addAnnotatedClass(FollowedArtist.class);
+        configuration.addAnnotatedClass(SpotifyUser.class);
+
+        ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
+                .applySettings(configuration.getProperties())
+                .build();
+
+        sessionFactory = configuration.buildSessionFactory(serviceRegistry);
     }
 
-    public String getAlbumName(String albumId) {
+    public String getAlbumNameById(String albumId) {
         AlbumRequest request = api.getAlbum(albumId).build();
         try {
             Album album = request.get();
@@ -76,9 +93,8 @@ public class SpotifyService {
         return "Cannot find album: " + albumId;
     }
 
-    private List<Artist> searchArtistsByName(String artistName) throws ArtistNotFoundException, IOException {
-        // Make the request, we'd only ever need to get the first three artists
-        ArtistSearchRequest request = api.searchArtists(artistName).limit(3).build();
+    private List<Artist> searchArtistsByName(String artistName, int listSize) throws ArtistNotFoundException, IOException {
+        ArtistSearchRequest request = api.searchArtists(artistName).limit(listSize).build();
         try {
             return request.get().getItems();
         } catch (WebApiException e) {
@@ -88,7 +104,7 @@ public class SpotifyService {
 
     public String getArtistsStringByName(String artistName) {
         try {
-            List<Artist> artists = searchArtistsByName(artistName);
+            List<Artist> artists = searchArtistsByName(artistName, 3);
             if (artists.size() == 0) {
                 return "No results for " + artistName;
             }
@@ -112,4 +128,83 @@ public class SpotifyService {
         }
     }
 
+    public void notifyUserAlbumUpdates() {
+        Session session = sessionFactory.openSession();
+        Transaction tx = null;
+
+        try {
+            tx = session.beginTransaction();
+
+            // Get artists from DB
+            List<FollowedArtist> dbArtists =
+                    session.createQuery("FROM FollowedArtist").list();
+
+            // Create a map of DB Artist ID => FollowedArtist
+            HashMap<String, FollowedArtist> dbArtistAlbumCountMap = new HashMap<>();
+
+            // Get corresponding artists from API
+            // First we have to build a string of the artist ids
+            StringBuilder artistIds = new StringBuilder();
+            for (FollowedArtist followedArtist : dbArtists) {
+                artistIds.append(followedArtist.getId()).append(",");
+                // Also stick the artist ID and album count in the map
+                dbArtistAlbumCountMap.put
+                        (followedArtist.getId(), followedArtist);
+            }
+            ArtistsRequest artistsRequest =
+                    api.getArtists(artistIds.toString()).build();
+            List<Artist> apiArtists = artistsRequest.get();
+
+            // Now that we have the artists from spotify and the
+            // artistId => FollowedArtist map, we can do our logic
+            for (Artist apiArtist : apiArtists) {
+
+                FollowedArtist dbArtist =
+                        dbArtistAlbumCountMap.get(apiArtist.getId());
+                List<SimpleAlbum> albumList = getArtistsAlbums(apiArtist.getId());
+            }
+
+            tx.commit();
+        } catch (Exception e) {
+            if (tx!=null) tx.rollback();
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
+    }
+
+    // Get list of albums and singles for a given artist
+    public List<SimpleAlbum> getArtistsAlbums(String artistId) {
+        Session session = sessionFactory.openSession();
+
+        try {
+            AlbumsForArtistRequest request =
+                    api.getAlbumsForArtist(artistId)
+                            .market("US")
+                            .types(AlbumType.ALBUM, AlbumType.SINGLE)
+                            .build();
+            List<SimpleAlbum> albums = request.get().getItems();
+            return albums;
+        } catch (WebApiException | IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public String followArtist(String artistName) {
+        try {
+            // Grab a list of artists that the user might be intending to follow
+            // It's possible that the user intended to follow a different artist
+            // Than the Spotify API thinks, so we want to account for that
+            List<Artist> potentialArtists = searchArtistsByName(artistName, 3);
+
+            //
+
+        } catch (ArtistNotFoundException | IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
 }
