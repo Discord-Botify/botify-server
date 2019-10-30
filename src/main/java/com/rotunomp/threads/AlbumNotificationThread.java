@@ -47,18 +47,8 @@ public class AlbumNotificationThread extends Thread {
             HashMap<String, FollowedArtist> dbArtistAlbumCountMap = new HashMap<>();
 
             // Get corresponding artists from API
-            // First we have to build a string of the artist ids
-            StringBuilder artistIds = new StringBuilder();
-            for (FollowedArtist followedArtist : dbArtists) {
-                artistIds.append(followedArtist.getId()).append(",");
-                // Also stick the artist ID and album count in the map
-                dbArtistAlbumCountMap.put
-                        (followedArtist.getId(), followedArtist);
-            }
-            // Remove trailing comma
-            artistIds.deleteCharAt(artistIds.length() - 1);
             List<Artist> apiArtists =
-                    spotifyService.getArtistList(artistIds.toString());
+                    spotifyService.getArtistList(dbArtists);
 
             // Now that we have the artists from spotify and the
             // artistId => FollowedArtist map, we can do our logic
@@ -83,6 +73,7 @@ public class AlbumNotificationThread extends Thread {
 
             // Commit all our DB changes and we're done! Whew.
             tx.commit();
+            System.out.println("Album notification cycle complete!");
         } catch (Exception e) {
             if (tx!=null) tx.rollback();
             e.printStackTrace();

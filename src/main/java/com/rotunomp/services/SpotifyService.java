@@ -22,9 +22,11 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class SpotifyService {
 
@@ -50,27 +52,38 @@ public class SpotifyService {
         final ClientCredentialsGrantRequest request = api.clientCredentialsGrant().build();
 
         /* Use the request object to make the request, either asynchronously (getAsync) or synchronously (get) */
-        final SettableFuture<ClientCredentials> responseFuture = request.getAsync();
+        final ClientCredentials clientCredentials;
+        try {
+            clientCredentials = request.get();
+            System.out.println("Successfully retrieved an access token! " + clientCredentials.getAccessToken());
+            System.out.println("The access token expires in " + clientCredentials.getExpiresIn() + " seconds");
+            api.setAccessToken(clientCredentials.getAccessToken());
+
+        } catch (IOException | WebApiException e) {
+            e.printStackTrace();
+            System.out.println("Error connecting to Spotify");
+        }
 
         /* Add callbacks to handle success and failure */
-        Futures.addCallback(responseFuture, new FutureCallback<ClientCredentials>() {
-            @Override
-            public void onSuccess(ClientCredentials clientCredentials) {
-                /* The tokens were retrieved successfully! */
-                System.out.println("Successfully retrieved an access token! " + clientCredentials.getAccessToken());
-                System.out.println("The access token expires in " + clientCredentials.getExpiresIn() + " seconds");
-
-                /* Set access token on the Api object so that it's used going forward */
-                api.setAccessToken(clientCredentials.getAccessToken());
-
-                /* Please note that this flow does not return a refresh token. * That's only for the Authorization code flow */
-            }
-
-            @Override
-            public void onFailure(Throwable throwable) {
-                /* An error occurred while getting the access token. This is probably caused by the client id or * client secret is invalid. */
-            }
-        });
+//        Futures.addCallback(responseFuture, new FutureCallback<ClientCredentials>() {
+//            @Override
+//            public void onSuccess(ClientCredentials clientCredentials) {
+//                /* The tokens were retrieved successfully! */
+//                System.out.println("Successfully retrieved an access token! " + clientCredentials.getAccessToken());
+//                System.out.println("The access token expires in " + clientCredentials.getExpiresIn() + " seconds");
+//
+//                /* Set access token on the Api object so that it's used going forward */
+//                api.setAccessToken(clientCredentials.getAccessToken());
+//
+//                /* Please note that this flow does not return a refresh token. * That's only for the Authorization code flow */
+//            }
+//
+//            @Override
+//            public void onFailure(Throwable throwable) {
+//                /* An error occurred while getting the access token. This is probably caused by the client id or * client secret is invalid. */
+//                System.out.println("Error connecting to Spotify");
+//            }
+//        });
         // Set up Hibernate environment
         sessionFactory = SessionFactoryInstance.getInstance();
     }
@@ -121,51 +134,6 @@ public class SpotifyService {
             return "Something went wrong. Try again later!";
         }
     }
-
-//    public void notifyUserAlbumUpdates() {
-//        Session session = sessionFactory.openSession();
-//        Transaction tx = null;
-//
-//        try {
-//            tx = session.beginTransaction();
-//
-//            // Get artists from DB
-//            List<FollowedArtist> dbArtists =
-//                    session.createQuery("FROM FollowedArtist").list();
-//
-//            // Create a map of DB Artist ID => FollowedArtist
-//            HashMap<String, FollowedArtist> dbArtistAlbumCountMap = new HashMap<>();
-//
-//            // Get corresponding artists from API
-//            // First we have to build a string of the artist ids
-//            StringBuilder artistIds = new StringBuilder();
-//            for (FollowedArtist followedArtist : dbArtists) {
-//                artistIds.append(followedArtist.getId()).append(",");
-//                // Also stick the artist ID and album count in the map
-//                dbArtistAlbumCountMap.put
-//                        (followedArtist.getId(), followedArtist);
-//            }
-//            ArtistsRequest artistsRequest =
-//                    api.getArtists(artistIds.toString()).build();
-//            List<Artist> apiArtists = artistsRequest.get();
-//
-//            // Now that we have the artists from spotify and the
-//            // artistId => FollowedArtist map, we can do our logic
-//            for (Artist apiArtist : apiArtists) {
-//
-//                FollowedArtist dbArtist =
-//                        dbArtistAlbumCountMap.get(apiArtist.getId());
-//                List<SimpleAlbum> albumList = getArtistsAlbums(apiArtist.getId());
-//            }
-//
-//            tx.commit();
-//        } catch (Exception e) {
-//            if (tx!=null) tx.rollback();
-//            e.printStackTrace();
-//        } finally {
-//            session.close();
-//        }
-//    }
 
     // Get list of albums and singles for a given artist
     public List<SimpleAlbum> getArtistsAlbums(String artistId) {
@@ -234,9 +202,13 @@ public class SpotifyService {
         return "Failure adding" + artistName;
     }
 
-    public synchronized List<Artist> getArtistList(String artistIdCSV) {
+    public synchronized List<Artist> getArtistList(List<FollowedArtist> artists) {
+        List<String> artistIds;
+        // put all the artist ids into this new list
+        artistIds = artists.stream().map(a -> a.getId()).collect(Collectors.toList());
+
         ArtistsRequest artistsRequest =
-                api.getArtists(artistIdCSV).build();
+                api.getArtists(artistIds).build();
         try {
             return artistsRequest.get();
         } catch (IOException | WebApiException e) {

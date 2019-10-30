@@ -2,15 +2,11 @@ package com.rotunomp.app;
 
 import com.rotunomp.listener.PrivateListener;
 import com.rotunomp.listener.ServerListener;
-import com.rotunomp.threads.AlbumNotificationThread;
 import net.dv8tion.jda.api.AccountType;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 
 import javax.security.auth.login.LoginException;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.Date;
 
 public class Application {
     public static void main(String[] args) throws LoginException {
@@ -25,6 +21,7 @@ public class Application {
 //        while (true) {
 //            LocalDateTime currentTime = LocalDateTime.now();
 //            if(timeSinceLastUpdate.isBefore(currentTime.minusHours(4))) {
+//                System.out.println("Beginning the album notification thread");
 //                AlbumNotificationThread thread = new AlbumNotificationThread(jda);
 //                thread.start();
 //                timeSinceLastUpdate = currentTime;
