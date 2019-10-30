@@ -3,16 +3,11 @@ package com.rotunomp.listener;
 import com.rotunomp.apiWrappers.PokemonApiWrapper;
 import com.rotunomp.operations.FunctionName;
 import com.rotunomp.services.PingService;
-import com.rotunomp.services.SpotifyService;
-import com.wrapper.spotify.models.SimpleAlbum;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.guild.GenericGuildMessageEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 import java.util.HashMap;
-import java.util.List;
 
 public class ServerListener extends ListenerAdapter {
 

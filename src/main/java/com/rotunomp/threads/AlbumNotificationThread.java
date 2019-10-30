@@ -4,14 +4,10 @@ import com.rotunomp.app.SessionFactoryInstance;
 import com.rotunomp.models.FollowedArtist;
 import com.rotunomp.models.SpotifyUser;
 import com.rotunomp.services.SpotifyService;
-import com.wrapper.spotify.methods.ArtistsRequest;
-import com.wrapper.spotify.methods.UserRequest;
-import com.wrapper.spotify.models.Album;
-import com.wrapper.spotify.models.Artist;
-import com.wrapper.spotify.models.SimpleAlbum;
+import com.wrapper.spotify.model_objects.specification.AlbumSimplified;
+import com.wrapper.spotify.model_objects.specification.Artist;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.internal.entities.UserImpl;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -45,6 +41,9 @@ public class AlbumNotificationThread extends Thread {
 
             // Create a map of DB Artist ID => FollowedArtist
             HashMap<String, FollowedArtist> dbArtistAlbumCountMap = new HashMap<>();
+            for (FollowedArtist dbArtist : dbArtists) {
+                dbArtistAlbumCountMap.put(dbArtist.getId(), dbArtist);
+            }
 
             // Get corresponding artists from API
             List<Artist> apiArtists =
@@ -56,13 +55,14 @@ public class AlbumNotificationThread extends Thread {
             for (Artist apiArtist : apiArtists) {
                 FollowedArtist dbArtist =
                         dbArtistAlbumCountMap.get(apiArtist.getId());
-                List<SimpleAlbum> albumList =
+                List<AlbumSimplified> albumList =
                         spotifyService.getArtistsAlbums(apiArtist.getId());
                 // If the apiArtist's album list is longer than our saved album list
                 // we need to send the notification!
                 if(albumList.size() > dbArtist.getAlbumCount()) {
                     // Send the notification to all of the followers!
                     for (SpotifyUser user : dbArtist.getFollowers()) {
+                        System.out.println("Follower of " + dbArtist.getName() + ": " + user.getId());
                         sendAlbumUpdateNotification(albumList, user.getId(), apiArtist.getName());
                     }
                     // Also update the albumCount in the database
@@ -83,19 +83,19 @@ public class AlbumNotificationThread extends Thread {
 
     }
 
-    private void sendAlbumUpdateNotification(List<SimpleAlbum> albums, String userId, String artistName) {
+    private void sendAlbumUpdateNotification(List<AlbumSimplified> albums, String userId, String artistName) {
         // Figure out the most recent album
-        SimpleAlbum mostRecentAlbum = albums.get(0);
+        AlbumSimplified mostRecentAlbum = albums.get(0);
         // Construct the message we want to send
         StringBuilder str = new StringBuilder();
-        str.append("New")
+        str.append("New ")
         .append(mostRecentAlbum.getAlbumType().type)
-        .append("from")
+        .append(" from ")
         .append(artistName)
-        .append(":")
+        .append(" : ")
         .append(mostRecentAlbum.getName())
-        .append("|")
-        .append(mostRecentAlbum.getHref());
+        .append(" | https://open.spotify.com/album/")
+        .append(mostRecentAlbum.getId());
 
         sendMessageToUser(str.toString(), userId);
     }
