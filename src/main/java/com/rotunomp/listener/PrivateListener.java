@@ -69,6 +69,9 @@ public class PrivateListener extends ListenerAdapter {
                             channel.sendMessage(
                                     spotifyService.getArtistsStringByName(str.toString()))
                                     .queue();
+                            channel.addReactionById(channel.getLatestMessageId(),"U+0031 U+20E3");
+                            channel.addReactionById(channel.getLatestMessageId(),"U+0032 U+20E3");
+                            channel.addReactionById(channel.getLatestMessageId(),"U+0033 U+20E3");
                             break;
                         case "albums":
                             List<SimpleAlbum> albums = spotifyService.getArtistsAlbums(splitCommand[2]);
