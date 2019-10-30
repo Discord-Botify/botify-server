@@ -1,5 +1,6 @@
 package com.rotunomp.services;
 
+import com.google.common.collect.ForwardingQueue;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
@@ -22,6 +23,7 @@ import org.hibernate.service.ServiceRegistry;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 public class SpotifyService {
 
@@ -192,19 +194,52 @@ public class SpotifyService {
         return null;
     }
 
-    public String followArtist(String artistName) {
+    public String followArtist(String artistName, String userId) {
+        Session session = sessionFactory.openSession();
+        Transaction tx = null;
         try {
+            tx = session.beginTransaction();
             // Grab a list of artists that the user might be intending to follow
             // It's possible that the user intended to follow a different artist
             // Than the Spotify API thinks, so we want to account for that
             List<Artist> potentialArtists = searchArtistsByName(artistName, 3);
+            String artistId = potentialArtists.get(0).getId();
 
-            //
+            // TODO: Account for the user potentially not entering the artist they actually want
+
+            // Get the artist from the DB. If the artist does not exist, create it
+            FollowedArtist followedArtist = session.get(FollowedArtist.class, artistId);
+            if (followedArtist == null) {
+                followedArtist = new FollowedArtist();
+                followedArtist.setId(artistId);
+                session.save(followedArtist);
+            }
+
+            // Get the user from the DB. If the user does not exist, create it
+            SpotifyUser user = session.get(SpotifyUser.class, userId);
+            if (user == null) {
+                user = new SpotifyUser();
+                user.setId(userId);
+                session.save(user);
+            }
+
+            // Add the user to the artist
+            followedArtist.getFollowers().add(user);
+            session.persist(followedArtist);
+
+            tx.commit();
+
+            return "Success adding " + artistName;
 
         } catch (ArtistNotFoundException | IOException e) {
             e.printStackTrace();
+            if(tx != null) {
+                session.getTransaction().rollback();
+            }
+        } finally {
+            session.close();
         }
 
-        return null;
+        return "Failure adding" + artistName;
     }
 }
