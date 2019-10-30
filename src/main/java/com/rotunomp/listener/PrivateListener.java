@@ -2,7 +2,7 @@ package com.rotunomp.listener;
 
 import com.rotunomp.operations.FunctionName;
 import com.rotunomp.services.SpotifyService;
-import com.wrapper.spotify.models.SimpleAlbum;
+import com.wrapper.spotify.model_objects.specification.AlbumSimplified;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -78,8 +78,8 @@ public class PrivateListener extends ListenerAdapter {
 //                            channel.addReactionById(channel.getLatestMessageId(),"U+0033 U+20E3").queue();
                             break;
                         case "albums":
-                            List<SimpleAlbum> albums = spotifyService.getArtistsAlbums(splitCommand[2]);
-                            for (SimpleAlbum album : albums) {
+                            List<AlbumSimplified> albums = spotifyService.getArtistsAlbums(splitCommand[2]);
+                            for (AlbumSimplified album : albums) {
                                 System.out.println(album.toString());
                             }
                             break;
