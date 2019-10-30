@@ -5,6 +5,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
 import com.rotunomp.app.Properties;
+import com.rotunomp.app.SessionFactoryInstance;
 import com.rotunomp.exceptions.ArtistNotFoundException;
 import com.rotunomp.models.FollowedArtist;
 import com.rotunomp.models.SpotifyUser;
@@ -70,17 +71,8 @@ public class SpotifyService {
                 /* An error occurred while getting the access token. This is probably caused by the client id or * client secret is invalid. */
             }
         });
-
-        // Set up the Hibernate environment
-        Configuration configuration = new Configuration();
-        configuration.addAnnotatedClass(FollowedArtist.class);
-        configuration.addAnnotatedClass(SpotifyUser.class);
-
-        ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
-                .applySettings(configuration.getProperties())
-                .build();
-
-        sessionFactory = configuration.buildSessionFactory(serviceRegistry);
+        // Set up Hibernate environment
+        sessionFactory = SessionFactoryInstance.getInstance();
     }
 
     public String getAlbumNameById(String albumId) {
@@ -130,50 +122,50 @@ public class SpotifyService {
         }
     }
 
-    public void notifyUserAlbumUpdates() {
-        Session session = sessionFactory.openSession();
-        Transaction tx = null;
-
-        try {
-            tx = session.beginTransaction();
-
-            // Get artists from DB
-            List<FollowedArtist> dbArtists =
-                    session.createQuery("FROM FollowedArtist").list();
-
-            // Create a map of DB Artist ID => FollowedArtist
-            HashMap<String, FollowedArtist> dbArtistAlbumCountMap = new HashMap<>();
-
-            // Get corresponding artists from API
-            // First we have to build a string of the artist ids
-            StringBuilder artistIds = new StringBuilder();
-            for (FollowedArtist followedArtist : dbArtists) {
-                artistIds.append(followedArtist.getId()).append(",");
-                // Also stick the artist ID and album count in the map
-                dbArtistAlbumCountMap.put
-                        (followedArtist.getId(), followedArtist);
-            }
-            ArtistsRequest artistsRequest =
-                    api.getArtists(artistIds.toString()).build();
-            List<Artist> apiArtists = artistsRequest.get();
-
-            // Now that we have the artists from spotify and the
-            // artistId => FollowedArtist map, we can do our logic
-            for (Artist apiArtist : apiArtists) {
-
-                FollowedArtist dbArtist =
-                        dbArtistAlbumCountMap.get(apiArtist.getId());
-                List<SimpleAlbum> albumList = getArtistsAlbums(apiArtist.getId());
-            }
-
-            tx.commit();
-        } catch (Exception e) {
-            if (tx!=null) tx.rollback();
-            e.printStackTrace();
-        } finally {
-            session.close();
-        }
-    }
+//    public void notifyUserAlbumUpdates() {
+//        Session session = sessionFactory.openSession();
+//        Transaction tx = null;
+//
+//        try {
+//            tx = session.beginTransaction();
+//
+//            // Get artists from DB
+//            List<FollowedArtist> dbArtists =
+//                    session.createQuery("FROM FollowedArtist").list();
+//
+//            // Create a map of DB Artist ID => FollowedArtist
+//            HashMap<String, FollowedArtist> dbArtistAlbumCountMap = new HashMap<>();
+//
+//            // Get corresponding artists from API
+//            // First we have to build a string of the artist ids
+//            StringBuilder artistIds = new StringBuilder();
+//            for (FollowedArtist followedArtist : dbArtists) {
+//                artistIds.append(followedArtist.getId()).append(",");
+//                // Also stick the artist ID and album count in the map
+//                dbArtistAlbumCountMap.put
+//                        (followedArtist.getId(), followedArtist);
+//            }
+//            ArtistsRequest artistsRequest =
+//                    api.getArtists(artistIds.toString()).build();
+//            List<Artist> apiArtists = artistsRequest.get();
+//
+//            // Now that we have the artists from spotify and the
+//            // artistId => FollowedArtist map, we can do our logic
+//            for (Artist apiArtist : apiArtists) {
+//
+//                FollowedArtist dbArtist =
+//                        dbArtistAlbumCountMap.get(apiArtist.getId());
+//                List<SimpleAlbum> albumList = getArtistsAlbums(apiArtist.getId());
+//            }
+//
+//            tx.commit();
+//        } catch (Exception e) {
+//            if (tx!=null) tx.rollback();
+//            e.printStackTrace();
+//        } finally {
+//            session.close();
+//        }
+//    }
 
     // Get list of albums and singles for a given artist
     public List<SimpleAlbum> getArtistsAlbums(String artistId) {
@@ -185,8 +177,7 @@ public class SpotifyService {
                             .market("US")
                             .types(AlbumType.ALBUM, AlbumType.SINGLE)
                             .build();
-            List<SimpleAlbum> albums = request.get().getItems();
-            return albums;
+            return request.get().getItems();
         } catch (WebApiException | IOException e) {
             e.printStackTrace();
         }
@@ -241,5 +232,17 @@ public class SpotifyService {
         }
 
         return "Failure adding" + artistName;
+    }
+
+    public synchronized List<Artist> getArtistList(String artistIdCSV) {
+        ArtistsRequest artistsRequest =
+                api.getArtists(artistIdCSV).build();
+        try {
+            return artistsRequest.get();
+        } catch (IOException | WebApiException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }
