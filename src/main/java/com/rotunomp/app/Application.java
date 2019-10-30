@@ -21,15 +21,15 @@ public class Application {
 
         // TODO: While loop that on certain times executes an update for notifications
         // We want to call this function when we run the bot, and every four hours after that
-        LocalDateTime timeSinceLastUpdate = LocalDateTime.now().minusHours(4);
-        while (true) {
-            LocalDateTime currentTime = LocalDateTime.now();
-            if(timeSinceLastUpdate.isBefore(currentTime.minusHours(4))) {
-                AlbumNotificationThread thread = new AlbumNotificationThread(jda);
-                thread.start();
-                timeSinceLastUpdate = currentTime;
-            }
-        }
+//        LocalDateTime timeSinceLastUpdate = LocalDateTime.now().minusHours(4);
+//        while (true) {
+//            LocalDateTime currentTime = LocalDateTime.now();
+//            if(timeSinceLastUpdate.isBefore(currentTime.minusHours(4))) {
+//                AlbumNotificationThread thread = new AlbumNotificationThread(jda);
+//                thread.start();
+//                timeSinceLastUpdate = currentTime;
+//            }
+//        }
 
     }
 
