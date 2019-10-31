@@ -142,8 +142,16 @@ public class SpotifyService {
             // It's possible that the user intended to follow a different artist
             // Than the Spotify API thinks, so we want to account for that
             List<Artist> potentialArtists = searchArtistsByName(artistName, 3);
-            String artistId = potentialArtists.get(0).getId();
-            artistName = potentialArtists.get(0).getName();
+            Artist apiArtist = null;
+
+            // If the user puts in an artist that doesn't exist, return this string
+            try {
+                apiArtist = potentialArtists.get(0);
+            } catch (Exception e) {
+                return "Could not find " + artistName;
+            }
+            String artistId = apiArtist.getId();
+            artistName = apiArtist.getName();
 
             // TODO: Account for the user potentially not entering the artist they actually want
 
@@ -153,6 +161,7 @@ public class SpotifyService {
                 followedArtist = new FollowedArtist();
                 followedArtist.setId(artistId);
                 followedArtist.setName(artistName);
+                followedArtist.setAlbumCount(getArtistsAlbums(artistId).size());
                 session.save(followedArtist);
             }
 
@@ -172,7 +181,7 @@ public class SpotifyService {
 
             return "Success adding " + artistName;
 
-        } catch (ArtistNotFoundException | IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             if(tx != null) {
                 session.getTransaction().rollback();
