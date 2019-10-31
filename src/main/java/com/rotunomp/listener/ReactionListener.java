@@ -7,8 +7,8 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class ReactionListener extends ListenerAdapter {
-    String artist;
-    SpotifyService spotifyService;
+    private String artist;
+    private SpotifyService spotifyService;
 
     public ReactionListener() {
         spotifyService = SpotifyService.getService();
@@ -22,9 +22,10 @@ public class ReactionListener extends ListenerAdapter {
 
         System.out.println("Received a private reaction event");
 
-         String message = event.getChannel().retrieveMessageById(
-                 event.getChannel().getLatestMessageId())
-                 .toString();
+         Message message = (Message) event.getChannel().retrieveMessageById(
+                 event.getChannel().getLatestMessageId());
+
+         message.getContentDisplay();
 
         switch (event.getReaction().toString()) {
             case "U+0031 U+20E3":
