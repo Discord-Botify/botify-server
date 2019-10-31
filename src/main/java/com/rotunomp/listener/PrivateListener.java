@@ -84,16 +84,19 @@ public class PrivateListener extends ListenerAdapter {
                             }
                             break;
                         case "follow":
-                            StringBuilder artist = new StringBuilder();
+                            str = new StringBuilder();
                             // Loop over all remaining text in the command to get full artist name
                             for (int i = 2; i < splitCommand.length; i++) {
-                                artist.append(splitCommand[i]).append(" ");
+                                str.append(splitCommand[i]).append(" ");
                             }
-                            User user = message.getAuthor();
                             channel.sendMessage(
-                                    spotifyService.followArtist(artist.toString(),
-                                            user.getId())
-                            ).queue();
+                                    spotifyService.getArtistsStringByName(str.toString()))
+                                    .queue(message1 -> {
+                                        message1.addReaction("U+0031 U+20E3").queue();
+                                        message1.addReaction("U+0032 U+20E3").queue();
+                                        message1.addReaction("U+0033 U+20E3").queue();
+                                    });
+
                             break;
                         default:
                             channel.sendMessage("Usage: !spotify album/artist <id/name>").queue();
