@@ -33,5 +33,7 @@ public class ReactionListener extends ListenerAdapter {
             default:
                 break;
         }
+
+        System.out.println(message);
     }
 }
