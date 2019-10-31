@@ -22,17 +22,23 @@ public class ReactionListener extends ListenerAdapter {
 
         System.out.println("Received a private reaction event");
 
-         Message message = (Message) event.getChannel().retrieveMessageById(
+        Message message = (Message) event.getChannel().retrieveMessageById(
                  event.getChannel().getLatestMessageId());
+        User user = event.getUser();
 
-         message.getContentDisplay();
+        String content = message.getContentDisplay();
+
+        String split[] = content.split("\n");
 
         switch (event.getReaction().toString()) {
             case "U+0031 U+20E3":
+                spotifyService.followArtist(split[1].split(" ")[1], user.getId());
                 break;
             case "U+0032 U+20E3":
+                spotifyService.followArtist(split[2].split(" ")[1], user.getId());
                 break;
             case "U+0033 U+20E3":
+                spotifyService.followArtist(split[3].split(" ")[1], user.getId());
                 break;
             default:
                 break;
