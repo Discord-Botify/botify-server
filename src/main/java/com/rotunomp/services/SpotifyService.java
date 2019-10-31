@@ -22,6 +22,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -200,16 +201,30 @@ public class SpotifyService {
 
         // The api is only able to process lists of 50 or less. We need to paginate the
         // List of artist ids to make batch requests of 50 maximum
-        int remaining;
+        int remainingArtists = artistIds.size();
+        List<Artist> returnList = new ArrayList<>();
+        while (remainingArtists > 0) {
+            GetSeveralArtistsRequest artistsRequest = null;
+            if(remainingArtists > 50) {
+                artistsRequest =
+                        spotifyApi.getSeveralArtists(
+                                artistIds.subList(0, 50)
+                                        .toArray(new String[artistIds.size()])).build();
+                artistIds = artistIds.subList(50, artistIds.size());
+            } else {
+                artistsRequest =
+                        spotifyApi.getSeveralArtists(artistIds.toArray(new String[artistIds.size()])).build();
+            }
 
-        GetSeveralArtistsRequest artistsRequest =
-                spotifyApi.getSeveralArtists(artistIds.toArray(new String[artistIds.size()])).build();
-        try {
-            return Arrays.asList(artistsRequest.execute());
-        } catch (IOException | SpotifyWebApiException e) {
-            e.printStackTrace();
+            try {
+                returnList.addAll(Arrays.asList(artistsRequest.execute()));
+            } catch (IOException | SpotifyWebApiException e) {
+                e.printStackTrace();
+            }
+
+            remainingArtists -= 50;
         }
 
-        return null;
+        return returnList;
     }
 }
