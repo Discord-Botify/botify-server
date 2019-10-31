@@ -12,6 +12,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 
@@ -20,15 +21,37 @@ public class AlbumNotificationThread extends Thread {
     private SpotifyService spotifyService;
     private SessionFactory sessionFactory;
     private JDA jda;
+    private int minutesPerUpdate;
 
-    public AlbumNotificationThread(JDA jda) {
+    public AlbumNotificationThread(JDA jda, int minutesPerUpdate) {
         spotifyService = SpotifyService.getService();
         sessionFactory = SessionFactoryInstance.getInstance();
         this.jda = jda;
+        this.minutesPerUpdate = minutesPerUpdate;
     }
 
     @Override
     public void run() {
+        LocalDateTime timeSinceLastUpdate = LocalDateTime.now().minusMinutes(minutesPerUpdate);
+        while (true) {
+            LocalDateTime currentTime = LocalDateTime.now();
+            if(timeSinceLastUpdate.isBefore(currentTime.minusMinutes(minutesPerUpdate))) {
+                System.out.println("Beginning the album notification process");
+                startNotifyProcess();
+                timeSinceLastUpdate = currentTime;
+            }
+            // We might as well sleep the thread for a bit to reduce compute power
+            try {
+                // 100 seconds
+                sleep(100000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    private void startNotifyProcess() {
         Session session = sessionFactory.openSession();
         Transaction tx = null;
 
