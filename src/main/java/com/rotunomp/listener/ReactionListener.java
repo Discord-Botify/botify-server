@@ -14,10 +14,13 @@ public class ReactionListener extends ListenerAdapter {
         spotifyService = SpotifyService.getService();
     }
 
-    public void onPrivateMessageReactionEvent (PrivateMessageReactionAddEvent event) {
+    @Override
+    public void onPrivateMessageReactionAdd (PrivateMessageReactionAddEvent event) {
         if (event.getUser().isBot()) {
             return;
         }
+
+        System.out.println("Received a private reaction event");
 
          String message = event.getChannel().retrieveMessageById(
                  event.getChannel().getLatestMessageId())

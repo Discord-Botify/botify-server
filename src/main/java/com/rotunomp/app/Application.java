@@ -1,6 +1,7 @@
 package com.rotunomp.app;
 
 import com.rotunomp.listener.PrivateListener;
+import com.rotunomp.listener.ReactionListener;
 import com.rotunomp.listener.ServerListener;
 import com.rotunomp.threads.AlbumNotificationThread;
 import net.dv8tion.jda.api.AccountType;
@@ -13,7 +14,7 @@ public class Application {
     public static void main(String[] args) throws LoginException {
         JDABuilder builder = new JDABuilder(AccountType.BOT);
         builder.setToken(Properties.get("discord_token"));
-        builder.addEventListeners(new ServerListener(), new PrivateListener());
+        builder.addEventListeners(new ServerListener(), new PrivateListener(), new ReactionListener());
         JDA jda = builder.build();
 
         // This begins a thread that controls the user notification

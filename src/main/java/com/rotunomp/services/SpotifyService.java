@@ -198,6 +198,10 @@ public class SpotifyService {
         // put all the artist ids into this new list
         artistIds = artists.stream().map(a -> a.getId()).collect(Collectors.toList());
 
+        // The api is only able to process lists of 50 or less. We need to paginate the
+        // List of artist ids to make batch requests of 50 maximum
+        int remaining;
+
         GetSeveralArtistsRequest artistsRequest =
                 spotifyApi.getSeveralArtists(artistIds.toArray(new String[artistIds.size()])).build();
         try {
