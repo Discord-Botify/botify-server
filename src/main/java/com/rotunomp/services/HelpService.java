@@ -5,7 +5,7 @@ import com.rotunomp.operations.FunctionType;
 
 public class HelpService {
 
-    public static HelpService serviceInstance;
+    private static HelpService serviceInstance;
 
     public static HelpService getInstance() {
         if (serviceInstance == null) {
