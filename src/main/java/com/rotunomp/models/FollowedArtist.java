@@ -1,5 +1,7 @@
 package com.rotunomp.models;
 
+import org.jetbrains.annotations.NotNull;
+
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.List;
@@ -8,7 +10,7 @@ import java.util.Set;
 @Entity
 @Table(name = "FollowedArtist", catalog = "discord_bot", uniqueConstraints = {
         @UniqueConstraint(columnNames = "artist_id")})
-public class FollowedArtist {
+public class FollowedArtist implements Comparable<FollowedArtist> {
 
     @Id
     @Column(name="artist_id")
@@ -56,5 +58,12 @@ public class FollowedArtist {
 
     public void setFollowers(Set<SpotifyUser> followers) {
         this.followers = followers;
+    }
+
+    // The result is positive if the first string is lexicographically greater
+    // than the second string else the result would be negative
+    @Override
+    public int compareTo(@NotNull FollowedArtist artist) {
+        return name.compareTo(artist.getName());
     }
 }

@@ -1,12 +1,16 @@
 package com.rotunomp.listener;
 
+import antlr.debug.MessageEvent;
 import com.rotunomp.operations.FunctionName;
 import com.rotunomp.operations.FunctionType;
 import com.rotunomp.services.SpotifyService;
 import com.wrapper.spotify.model_objects.specification.AlbumSimplified;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.Event;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -94,17 +98,7 @@ public class PrivateListener extends AbstractListener {
 
                             break;
                         case "unfollow":
-                            String artistId = splitCommand[2];
-                            channel.sendMessage(artistId).queue();
-                            channel.sendMessage(event.getAuthor().getId()).queue();
-                            channel.sendMessage(spotifyService.getFollowedArtistStringForUser(
-                                    event.getAuthor().getId())).queue(unfollowMessage -> {
-                                        unfollowMessage.addReaction("U+1F1E6").queue();;
-                            });
-
-                            channel.sendMessage(
-                                    spotifyService.unfollowArtist(artistId, event.getAuthor().getId())
-                            ).queue();
+                            doUnfollow(event);
                             break;
                         case "follow-list":
                             channel.sendMessage(
@@ -129,6 +123,37 @@ public class PrivateListener extends AbstractListener {
                     break;
                 default:
                     break;
+            }
+        }
+
+    }
+
+    private void doUnfollow(PrivateMessageReceivedEvent event) {
+        String[] emoji = {"U+1F1E6", "U+1F1E7", "U+1F1E8",
+                "U+1F1E9", "U+1F1EA", "U+1F1EB", "U+1F1EC", "U+1F1ED",
+                "U+1F1EE", "U+1F1EF"};
+
+        String unfollowArtists = spotifyService.getUnfollowArtistStringForUser(
+                event.getAuthor().getId());
+        String[] split = unfollowArtists.split("\\r?\\n");
+        StringBuilder unfollowArtistsSplit = new StringBuilder();
+
+        int counter = 0;
+
+        for (int i = 0; i < split.length; i++) {
+            System.out.println(split[i]);
+            unfollowArtistsSplit.append(":regional_indicator_"+(char)('a'+counter)+": ");
+            unfollowArtistsSplit.append(split[i]).append("\n");
+            counter++;
+            if (counter == 10 || split.length - i == 1) {
+                channel.sendMessage(unfollowArtistsSplit.toString()).queue(unfollowMessage -> {
+                    int followCount = unfollowMessage.getContentRaw().split("\\r?\\n").length;
+                    for (int j = 0; j < followCount; j++) {
+                        unfollowMessage.addReaction(emoji[j]).queue();
+                    }
+                });
+                unfollowArtistsSplit = new StringBuilder();
+                counter = 0;
             }
         }
 

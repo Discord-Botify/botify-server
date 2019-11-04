@@ -23,10 +23,8 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.lang.reflect.Array;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class SpotifyService {
@@ -242,6 +240,30 @@ public class SpotifyService {
             .append(" | ID: ")
             .append(followedArtist.getId())
             .append("\n");
+        }
+
+        return artists.toString();
+    }
+
+    public String getUnfollowArtistStringForUser(String userId) {
+        Set<FollowedArtist> followedArtists= getFollowedArtistsForUser(userId);
+        List<FollowedArtist> followedArtistList = new ArrayList<FollowedArtist>();
+
+        for (FollowedArtist artist : followedArtists) {
+            followedArtistList.add(artist);
+        }
+
+        Collections.sort(followedArtistList);
+
+        StringBuilder artists = new StringBuilder();
+
+        int i = 0;
+        for (FollowedArtist artist : followedArtistList) {
+            artists.append(artist.getName())
+                    .append(" | ID: ")
+                    .append(artist.getId())
+                    .append("\n");
+            i++;
         }
 
         return artists.toString();

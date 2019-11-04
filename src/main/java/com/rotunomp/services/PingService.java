@@ -16,6 +16,7 @@ public class PingService extends Thread {
     }
 
     public void run() {
+        channel.sendMessage("This is a ").queue();
         if (time == -1) {
             try {
                 sleep(10000);
