@@ -20,7 +20,7 @@ public class ReactionListener extends ListenerAdapter {
             return;
         }
 
-        System.out.println("Received a private reaction event");
+        System.out.println(event.getReaction().getReactionEmote().toString());
 
         PrivateChannel channel = event.getChannel();
 

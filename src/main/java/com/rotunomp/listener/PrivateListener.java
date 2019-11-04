@@ -97,6 +97,11 @@ public class PrivateListener extends AbstractListener {
                             String artistId = splitCommand[2];
                             channel.sendMessage(artistId).queue();
                             channel.sendMessage(event.getAuthor().getId()).queue();
+                            channel.sendMessage(spotifyService.getFollowedArtistStringForUser(
+                                    event.getAuthor().getId())).queue(unfollowMessage -> {
+                                        unfollowMessage.addReaction("U+1F1E6").queue();;
+                            });
+
                             channel.sendMessage(
                                     spotifyService.unfollowArtist(artistId, event.getAuthor().getId())
                             ).queue();
