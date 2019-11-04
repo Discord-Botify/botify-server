@@ -12,7 +12,7 @@ public class SpotifyUser {
     @Id
     @Column(name = "user_id")
     private String id;
-    @ManyToMany(mappedBy = "followers")
+    @ManyToMany(mappedBy = "followers", fetch = FetchType.EAGER)
     private Set<FollowedArtist> followedArtists = new HashSet<>();
 
     public SpotifyUser() {}

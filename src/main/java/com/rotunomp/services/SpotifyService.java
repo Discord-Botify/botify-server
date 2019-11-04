@@ -6,6 +6,7 @@ import com.rotunomp.app.SessionFactoryInstance;
 import com.rotunomp.exceptions.ArtistNotFoundException;
 import com.rotunomp.models.FollowedArtist;
 import com.rotunomp.models.SpotifyUser;
+import com.rotunomp.threads.TokenRefreshThread;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.credentials.ClientCredentials;
@@ -25,6 +26,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class SpotifyService {
@@ -66,6 +68,10 @@ public class SpotifyService {
 
         // Set up Hibernate environment
         sessionFactory = SessionFactoryInstance.getInstance();
+
+        // Begin the token refresh thread
+        TokenRefreshThread refreshThread = new TokenRefreshThread(spotifyApi);
+        refreshThread.start();
     }
 
     public String getAlbumNameById(String albumId) {
@@ -116,7 +122,7 @@ public class SpotifyService {
     }
 
     // Get list of albums and singles for a given artist
-    public List<AlbumSimplified> getArtistsAlbums(String artistId) {
+    public synchronized List<AlbumSimplified> getArtistsAlbums(String artistId) {
         Session session = sessionFactory.openSession();
 
         try {
@@ -226,5 +232,54 @@ public class SpotifyService {
         }
 
         return returnList;
+    }
+
+    public String getFollowedArtistStringForUser(String userId) {
+        Set<FollowedArtist> followedArtists= getFollowedArtistsForUser(userId);
+        StringBuilder artists = new StringBuilder();
+        for (FollowedArtist followedArtist : followedArtists) {
+            artists.append(followedArtist.getName())
+            .append(" | ID: ")
+            .append(followedArtist.getId())
+            .append("\n");
+        }
+
+        return artists.toString();
+    }
+
+    public Set<FollowedArtist> getFollowedArtistsForUser(String userId) {
+        Session session = sessionFactory.openSession();
+        Set<FollowedArtist> followedArtists = session.get(SpotifyUser.class, userId).getFollowedArtists();
+        session.close();
+        return followedArtists;
+    }
+
+    public String unfollowArtist(String artistId, String userId) {
+        Session session = sessionFactory.openSession();
+        Transaction tx = session.beginTransaction();
+
+        // First get the user from the database
+        SpotifyUser user = session.get(SpotifyUser.class, userId);
+
+        // Then get the artist from the database
+        FollowedArtist artist = session.get(FollowedArtist.class, artistId);
+        String artistName = artist.getName();
+
+        // Delete the artist from the user's following set
+        user.getFollowedArtists().remove(artist);
+        // Delete the user from the artist's followed set
+        artist.getFollowers().remove(user);
+
+        session.persist(artist);
+        session.persist(user);
+
+        if (artist.getFollowers().size() == 0) {
+            session.delete(artist);
+        }
+
+        tx.commit();
+        session.close();
+
+        return "Successfully unfollowed " + artistName;
     }
 }

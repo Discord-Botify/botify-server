@@ -22,28 +22,39 @@ public class ReactionListener extends ListenerAdapter {
 
         System.out.println("Received a private reaction event");
 
-        Message message = (Message) event.getChannel().retrieveMessageById(
-                 event.getChannel().getLatestMessageId());
+        PrivateChannel channel = event.getChannel();
+
+        Message message = channel.retrieveMessageById(
+                 event.getReaction().getMessageId()).complete();
         User user = event.getUser();
 
-        String content = message.getContentDisplay();
+        String content = message.getContentRaw();
 
-        String split[] = content.split("\n");
+        String[] split = content.split("\\r?\\n");
 
-        switch (event.getReaction().toString()) {
-            case "U+0031 U+20E3":
-                spotifyService.followArtist(split[1].split(" ")[1], user.getId());
+        System.out.println(event.getReaction().getReactionEmote().toString());
+
+        String artistName;
+
+        switch (event.getReaction().getReactionEmote().toString()) {
+            case "RE:U+31U+20e3":
+                artistName = split[1].split(" \\| ")[0];
+                spotifyService.followArtist(artistName, user.getId());
+                channel.sendMessage("Success following " + artistName).queue();
                 break;
-            case "U+0032 U+20E3":
-                spotifyService.followArtist(split[2].split(" ")[1], user.getId());
+            case "RE:U+32U+20e3":
+                artistName = split[2].split(" \\| ")[0];
+                spotifyService.followArtist(artistName, user.getId());
+                channel.sendMessage("Success following " + artistName).queue();
                 break;
-            case "U+0033 U+20E3":
-                spotifyService.followArtist(split[3].split(" ")[1], user.getId());
+            case "RE:U+33U+20e3":
+                artistName = split[3].split(" \\| ")[0];
+                spotifyService.followArtist(artistName, user.getId());
+                channel.sendMessage("Success following " + artistName).queue();
                 break;
             default:
                 break;
         }
 
-        System.out.println(message);
     }
 }

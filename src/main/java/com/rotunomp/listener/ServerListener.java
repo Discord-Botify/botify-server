@@ -2,27 +2,19 @@ package com.rotunomp.listener;
 
 import com.rotunomp.apiWrappers.PokemonApiWrapper;
 import com.rotunomp.operations.FunctionName;
+import com.rotunomp.operations.FunctionType;
 import com.rotunomp.services.PingService;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 import java.util.HashMap;
 
-public class ServerListener extends ListenerAdapter {
+public class ServerListener extends AbstractListener {
 
-    private HashMap<String, FunctionName> functionNameHashMap;
     private PingService pingService;
 
     public ServerListener() {
-        functionNameHashMap = new HashMap<>();
-        // Iterate through all the enums and put them into our hashmap
-        // HashMap is String command => FunctionName
-        for (FunctionName e : FunctionName.class.getEnumConstants()) {
-            functionNameHashMap.put(e.command, e);
-        };
-
-        // Instantiate all the services
+        super();
     }
 
     @Override
@@ -42,19 +34,23 @@ public class ServerListener extends ListenerAdapter {
         String messageRaw = message.getContentRaw();
         String[] splitCommand = messageRaw.split(" ");
         String command = splitCommand[0];
-        MessageChannel channel = event.getChannel();
+        this.channel = event.getChannel();
 
         // Initialize Member, Role, and Guild if we need them later
         Member member;
         Role role;
         Guild guild;
 
-        if(functionNameHashMap.containsKey(command)) {
+        if(this.functionNameHashMap.containsKey(command)) {
             System.out.println("Trying to execute command " + command + "...");
-            switch (functionNameHashMap.get(command)) {  // Gets the FunctionName Enum
+            FunctionName functionName = this.functionNameHashMap.get(command);
+            if (functionName.functionType == FunctionType.PRIVATE) {
+                channel.sendMessage("This is a private message-only command. Private message me this command instead of using it in a server!").queue();
+                return;
+            }
+            switch (functionName) {
                 case PING:
-                    pingService = new PingService(channel, 2000);
-//                    pingService.pong();
+                    pingService = new PingService(this.channel, 5000);
                     pingService.start();
                     break;
                 case REMOVE_ROLE:
@@ -62,28 +58,37 @@ public class ServerListener extends ListenerAdapter {
                     role = message.getMentionedRoles().get(0);
                     guild = event.getGuild();
                     guild.removeRoleFromMember(member, role).queue();
-                    channel.sendMessage(member.getUser().getAsMention() + " was removed from role " + role.getAsMention()).queue();
+                    this.channel.sendMessage(member.getUser().getAsMention() + " was removed from role " + role.getAsMention()).queue();
                     break;
                 case ADD_ROLE:
                     member = message.getMentionedMembers().get(0);
                     role = message.getMentionedRoles().get(0);
                     guild = event.getGuild();
                     guild.addRoleToMember(member, role).queue();
-                    channel.sendMessage(member.getUser().getAsMention() + " was added to role " + role.getAsMention()).queue();
+                    this.channel.sendMessage(member.getUser().getAsMention() + " was added to role " + role.getAsMention()).queue();
                     break;
                 case POKEMON:
                     String pokemonName = splitCommand[1];
                     PokemonApiWrapper pokemonApiWrapper = new PokemonApiWrapper();
-                    channel.sendMessage(pokemonApiWrapper.getPokemonTypes(pokemonName)).queue();
-                    channel.sendMessage(pokemonApiWrapper.getFlavorText(pokemonName)).queue();
+                    this.channel.sendMessage(pokemonApiWrapper.getPokemonTypes(pokemonName)).queue();
+                    this.channel.sendMessage(pokemonApiWrapper.getFlavorText(pokemonName)).queue();
+                    break;
+                case HELP:
+                    // See if the command has a second parameter and call the help function
+                    // accordingly
+                    try {
+                        this.sendHelpMessage(splitCommand[1]);
+                    } catch (Exception e) {
+                        this.sendHelpMessage();
+                    }
                     break;
                 default:
-                    channel.sendMessage("Command Error").queue();
+                    this.channel.sendMessage("Command Error").queue();
                     break;
-
             }
         }
 
     }
+
 
 }
