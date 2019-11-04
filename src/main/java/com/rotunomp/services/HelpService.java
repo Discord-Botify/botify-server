@@ -31,14 +31,20 @@ public class HelpService {
     public String getCommandHelpMessage(FunctionName functionName) {
         StringBuilder messageBuilder = new StringBuilder();
 
-        //
+        // Describe where the command can be used
         messageBuilder.append("This command can be used ");
         if(functionName.functionType == FunctionType.SERVER) {
-            messageBuilder.append("in a server only.");
+            messageBuilder.append("in a server only.\n");
         }
         else if (functionName.functionType == FunctionType.PRIVATE) {
-            
+            messageBuilder.append("in a private message only.\n");
         }
+        else {
+            messageBuilder.append("anywhere!\n");
+        }
+
+        messageBuilder.append(functionName.longHelp);
+
         return messageBuilder.toString();
     }
 }
