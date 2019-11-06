@@ -1,6 +1,7 @@
 package com.rotunomp.discordBot.models;
 
 import com.fasterxml.jackson.annotation.*;
+import com.google.gson.annotations.Expose;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -13,9 +14,11 @@ public class SpotifyUser {
 
     @Id
     @Column(name = "user_id")
+    @Expose
     private String id;
     @ManyToMany(mappedBy = "followers", fetch = FetchType.EAGER)
-    private transient Set<FollowedArtist> followedArtists = new HashSet<>();
+    @Expose
+    private Set<FollowedArtist> followedArtists = new HashSet<>();
 
     public SpotifyUser() {}
 

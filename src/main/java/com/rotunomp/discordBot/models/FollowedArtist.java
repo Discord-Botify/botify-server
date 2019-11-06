@@ -1,6 +1,7 @@
 package com.rotunomp.discordBot.models;
 
 import com.fasterxml.jackson.annotation.*;
+import com.google.gson.annotations.Expose;
 import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.*;
@@ -14,8 +15,11 @@ public class FollowedArtist implements Comparable<FollowedArtist> {
 
     @Id
     @Column(name="artist_id")
+    @Expose
     private String id;
+    @Expose
     private String name;
+    @Expose
     private int albumCount;
     @ManyToMany(cascade=CascadeType.ALL)
     @JoinTable(
@@ -24,7 +28,7 @@ public class FollowedArtist implements Comparable<FollowedArtist> {
             joinColumns = { @JoinColumn(name = "artist_id") },
             inverseJoinColumns = { @JoinColumn(name = "user_id") }
     )
-    private transient Set<SpotifyUser> followers = new HashSet<>();
+    private Set<SpotifyUser> followers = new HashSet<>();
 
     public FollowedArtist() {}
 
