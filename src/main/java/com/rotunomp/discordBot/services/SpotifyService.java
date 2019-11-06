@@ -21,6 +21,7 @@ import com.wrapper.spotify.requests.data.search.simplified.SearchArtistsRequest;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 
 import java.io.IOException;
 import java.util.*;
@@ -232,7 +233,7 @@ public class SpotifyService {
     }
 
     public String getFollowedArtistStringForUser(String userId) {
-        Set<FollowedArtist> followedArtists= getFollowedArtistsForUser(userId);
+        Set<FollowedArtist> followedArtists= getFollowedArtistsForDiscordUser(userId);
         StringBuilder artists = new StringBuilder();
         for (FollowedArtist followedArtist : followedArtists) {
             artists.append(followedArtist.getName())
@@ -244,8 +245,8 @@ public class SpotifyService {
         return artists.toString();
     }
 
-    public List<FollowedArtist> getFollowedArtistsListForUser(String userId) {
-        Set<FollowedArtist> followedArtists= getFollowedArtistsForUser(userId);
+    public List<FollowedArtist> getFollowedArtistsListForDiscordId(String userId) {
+        Set<FollowedArtist> followedArtists= getFollowedArtistsForDiscordUser(userId);
         List<FollowedArtist> followedArtistList = new ArrayList<FollowedArtist>();
 
         for (FollowedArtist artist : followedArtists) {
@@ -257,8 +258,19 @@ public class SpotifyService {
         return followedArtistList;
     }
 
+    public List<FollowedArtist> getFollowedArtistsListForSpotifyId(String userId) {
+        // Get the corresponding user in the database
+        Session session = sessionFactory.openSession();
+        Query query = sessionFactory.getCurrentSession().createQuery("from SpotifyUser where spotifyId = :spotifyId");
+        query.setParameter("spotifyId", userId);
+        SpotifyUser user = (SpotifyUser) query.list().get(0);
+
+        // Call the method to get the list of artists based on Discord ID
+        return getFollowedArtistsListForDiscordId(user.getId());
+    }
+
     public List<List<FollowedArtist>> getFollowedArtistInTens(String userId) {
-        List<FollowedArtist> bigArtistList= getFollowedArtistsListForUser(userId);
+        List<FollowedArtist> bigArtistList= getFollowedArtistsListForDiscordId(userId);
         List<List<FollowedArtist>> returnList = new ArrayList<>();
 
         // Get the size of the big list
@@ -276,7 +288,7 @@ public class SpotifyService {
 
     }
 
-    public Set<FollowedArtist> getFollowedArtistsForUser(String userId) {
+    public Set<FollowedArtist> getFollowedArtistsForDiscordUser(String userId) {
         Session session = sessionFactory.openSession();
         Set<FollowedArtist> followedArtists = session.get(SpotifyUser.class, userId).getFollowedArtists();
         session.close();

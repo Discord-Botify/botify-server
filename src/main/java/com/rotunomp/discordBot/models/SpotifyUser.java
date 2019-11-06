@@ -16,6 +16,8 @@ public class SpotifyUser {
     @Column(name = "user_id")
     @Expose
     private String id;
+    @Expose
+    private String spotifyId;
     @ManyToMany(mappedBy = "followers", fetch = FetchType.EAGER)
     @Expose
     private Set<FollowedArtist> followedArtists = new HashSet<>();
@@ -36,5 +38,13 @@ public class SpotifyUser {
 
     public void setFollowedArtists(Set<FollowedArtist> followedArtists) {
         this.followedArtists = followedArtists;
+    }
+
+    public String getSpotifyId() {
+        return spotifyId;
+    }
+
+    public void setSpotifyId(String spotifyId) {
+        this.spotifyId = spotifyId;
     }
 }

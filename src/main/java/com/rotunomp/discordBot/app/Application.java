@@ -30,13 +30,9 @@ public class Application {
         AlbumNotificationThread thread = new AlbumNotificationThread(jda, minutesPerUpdate);
         thread.start();
 
+        // Start the REST API
         new SpotifyRestController();
 
-//        startRestApi();
-
     }
-
-//    private static void startRestApi() {
-//    }
 
 }
