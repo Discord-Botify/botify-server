@@ -259,9 +259,11 @@ public class SpotifyService {
     public List<FollowedArtist> getFollowedArtistsListForSpotifyId(String userId) {
         // Get the corresponding user in the database
         Session session = sessionFactory.openSession();
-        Query query = sessionFactory.getCurrentSession().createQuery("from SpotifyUser where spotifyId = :spotifyId");
+        Transaction tx = session.beginTransaction();
+        Query query = session.createQuery("from SpotifyUser where spotifyId = :spotifyId");
         query.setParameter("spotifyId", userId);
         SpotifyUser user = (SpotifyUser) query.list().get(0);
+        tx.commit();
 
         // Call the method to get the list of artists based on Discord ID
         return getFollowedArtistsListForDiscordId(user.getId());
