@@ -49,7 +49,7 @@ public class DiscordService {
     // The main logic for signing in a user. In this method, we
     // send the authorization code to Discord to obtain an access token,
     // we get the user's information, and pass it back as a JSONObject
-    public JSONObject loginUser(String code) {
+    public JSONObject loginUser(String code) throws IOException {
         JSONObject returnJson = null;
 
         // Get the access token and refresh token
