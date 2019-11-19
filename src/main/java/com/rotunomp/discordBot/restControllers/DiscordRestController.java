@@ -28,6 +28,7 @@ public class DiscordRestController {
 
     public DiscordRestController() {
         discordService = DiscordService.getInstance();
+        appSessionService = AppSessionService.getInstance();
 
         post("/oauth/discord", (request, response) -> {
             response.type("application/json");
@@ -47,6 +48,26 @@ public class DiscordRestController {
             returnJson.append("sessionId", appSessionId);
             return returnJson;
         }, jsonWithExposeAnnotation());
+
+        options("/*",
+                (request, response) -> {
+
+                    String accessControlRequestHeaders = request
+                            .headers("Access-Control-Request-Headers");
+                    if (accessControlRequestHeaders != null) {
+                        response.header("Access-Control-Allow-Headers",
+                                accessControlRequestHeaders);
+                    }
+
+                    String accessControlRequestMethod = request
+                            .headers("Access-Control-Request-Method");
+                    if (accessControlRequestMethod != null) {
+                        response.header("Access-Control-Allow-Methods",
+                                accessControlRequestMethod);
+                    }
+
+                    return "OK";
+                });
 
 
     }
