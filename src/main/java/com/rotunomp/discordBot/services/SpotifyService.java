@@ -121,8 +121,6 @@ public class SpotifyService {
 
     // Get list of albums and singles for a given artist
     public synchronized List<AlbumSimplified> getArtistsAlbums(String artistId) {
-        Session session = sessionFactory.openSession();
-
         try {
             GetArtistsAlbumsRequest request =
                     spotifyApi.getArtistsAlbums(artistId)
