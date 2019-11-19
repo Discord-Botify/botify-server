@@ -8,9 +8,6 @@ import com.rotunomp.discordBot.models.FollowedArtist;
 import com.rotunomp.discordBot.models.SpotifyUser;
 import spark.ResponseTransformer;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public class JsonUtil {
 
     public static ResponseTransformer json() {

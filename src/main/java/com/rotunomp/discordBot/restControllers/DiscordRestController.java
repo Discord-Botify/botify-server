@@ -29,26 +29,6 @@ public class DiscordRestController {
     public DiscordRestController() {
         discordService = DiscordService.getInstance();
         appSessionService = AppSessionService.getInstance();
-
-        post("/oauth/discord", (request, response) -> {
-            response.type("application/json");
-
-            // Login the user through Discord OAuth and get their Discord user info
-            // Also create them in the database if they don't exist
-            String body = request.body();
-            JSONObject jsonBody = new JSONObject(body);
-            String code = jsonBody.getString("code");
-            JSONObject returnJson = discordService.loginUser(code);
-
-            // Start a session for the user
-            String discordId = returnJson.getString("id");
-            String appSessionId = appSessionService.startAppSession(discordId);
-
-            // Return the session ID and the user info in JSON format
-            returnJson.append("sessionId", appSessionId);
-            return returnJson;
-        }, jsonWithExposeAnnotation());
-
         options("/*",
                 (request, response) -> {
 
@@ -68,6 +48,28 @@ public class DiscordRestController {
 
                     return "OK";
                 });
+
+        before((request, response) -> response.header("Access-Control-Allow-Origin", "*"));
+
+
+        post("/oauth/discord", (request, response) -> {
+            response.type("application/json");
+
+            // Login the user through Discord OAuth and get their Discord user info
+            // Also create them in the database if they don't exist
+            String body = request.body();
+            JSONObject jsonBody = new JSONObject(body);
+            String code = jsonBody.getString("code");
+            JSONObject returnJson = discordService.loginUser(code);
+
+            // Start a session for the user
+            String discordId = returnJson.getString("id");
+            String appSessionId = appSessionService.startAppSession(discordId);
+
+            // Return the session ID and the user info in JSON format
+            returnJson.append("sessionId", appSessionId);
+            return returnJson;
+        }, jsonWithExposeAnnotation());
 
 
     }
