@@ -1,5 +1,6 @@
 package com.rotunomp.discordBot.restControllers;
 import com.google.gson.Gson;
+import com.rotunomp.discordBot.app.Properties;
 import com.rotunomp.discordBot.services.SpotifyService;
 
 import static spark.Spark.*;
@@ -12,6 +13,11 @@ public class SpotifyRestController {
     public SpotifyRestController() {
         spotifyService = SpotifyService.getService();
         String code;
+
+        // Set up SSL
+        String keyStoreLocation = Properties.get("ssl_certificate_location");
+        String keyStorePassword = Properties.get("ssl_password");
+        secure(keyStoreLocation, keyStorePassword, null, null);
 
         options("/*",
                 (request, response) -> {
