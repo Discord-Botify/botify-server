@@ -57,6 +57,24 @@ public class SpotifyRestController {
                 jsonWithExposeAnnotation()
         );
 
+        post(
+                "/users/follow/{discordId}/{artistId}",
+                (request, response) -> spotifyService.followArtist(
+                        request.params("artistId"), request.params("discordId")
+                ),
+                jsonWithExposeAnnotation()
+
+        );
+
+        delete(
+                "/users/follow/{discordId}/{artistId}",
+                (request, response) -> spotifyService.unfollowArtist(
+                        request.params("artistId"), request.params("discordId")
+                ),
+                jsonWithExposeAnnotation()
+
+        );
+
     }
 
     
