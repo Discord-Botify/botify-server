@@ -47,10 +47,13 @@ public class DiscordRestController {
             // Set status to 201
             response.status(201);
 
-            // Return the session ID and the user info in JSON format
-            returnJson.append("sessionId", appSessionId);
-            System.out.println("ReturnJson: " + returnJson.toString());
-            return returnJson;
+            // Build the object we're sending to the front end
+            UserInfoTransferObject userInfo = new UserInfoTransferObject();
+            userInfo.setAppSessionId(appSessionId);
+            userInfo.setDiscordName(returnJson.getString("username"));
+            userInfo.setDiscordDiscriminator(returnJson.getString("discriminator"));
+
+            return userInfo;
         }, json());
 
     }
