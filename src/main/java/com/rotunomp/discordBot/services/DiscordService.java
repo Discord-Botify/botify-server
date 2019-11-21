@@ -6,6 +6,7 @@ import com.rotunomp.discordBot.app.SessionFactoryInstance;
 import com.rotunomp.discordBot.models.SpotifyUser;
 import com.rotunomp.discordBot.models.AppSession;
 
+import com.sun.org.apache.xerces.internal.util.SynchronizedSymbolTable;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -74,11 +75,9 @@ public class DiscordService {
     // Build the request body for getting a user's Discord token
     private String getTokenExchangeBody(String code) {
 
-        String json = "{" + "'client_id': '" + CLIENT_ID + "'," + "'client_secret': '" + CLIENT_SECRET + "',"
-                + "'grant_type': 'authorization_code'," + "'code': '" + code + "'," + "'redirect_uri': '" + REDIRECT_URI
-                + "'," + "'scope': 'identify email connections'" + "}";
-
-        return json;
+        return "{" + "\"client_id\": \"" + CLIENT_ID + "\"," + "\"client_secret\": \"" + CLIENT_SECRET + "\","
+                + "\"grant_type\": \"authorization_code\"," + "\"code\": \"" + code + "\"," + "\"redirect_uri\": \"" + REDIRECT_URI
+                + "\"," + "\"scope\": \"identify email connections\"" + "}";
     }
 
     // Exchange code for access token and refresh token with the Discord API
@@ -90,6 +89,7 @@ public class DiscordService {
         httpPost.setHeader("Content-type", "application/x-www-form-urlencoded");   
         CloseableHttpResponse response = httpClient.execute(httpPost);
         JSONObject tokenResponseJson = new JSONObject (EntityUtils.toString(response.getEntity()));
+
         return tokenResponseJson;
     }
     
