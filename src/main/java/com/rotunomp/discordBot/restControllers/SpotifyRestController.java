@@ -1,6 +1,7 @@
 package com.rotunomp.discordBot.restControllers;
 import com.google.gson.Gson;
 import com.rotunomp.discordBot.app.Properties;
+import com.rotunomp.discordBot.services.AppSessionService;
 import com.rotunomp.discordBot.services.SpotifyService;
 
 import static spark.Spark.*;
@@ -9,9 +10,11 @@ import static com.rotunomp.discordBot.app.JsonUtil.*;
 public class SpotifyRestController {
 
     private SpotifyService spotifyService;
+    private AppSessionService appSessionService;
 
     public SpotifyRestController() {
         spotifyService = SpotifyService.getService();
+        appSessionService = AppSessionService.getInstance();
 
         // Get all artists in the database (proof of concept, not very functional)
         get("/artists",
@@ -20,29 +23,49 @@ public class SpotifyRestController {
         );
 
         // Get discord ID from session ID
-        // Get all a user's followed artists in the database from discord ID
         get(
                 "/users/:sessionId",
-                (request, response) -> spotifyService.getFollowedArtistsListForSpotifyId(
-                        request.params("spotifyUserId")
-                ),
+                (request, response) -> {
+                    String discordId = appSessionService.getDiscordIdFromSessionId(
+                            request.params(":sessionId")
+                    );
+
+                    return spotifyService.getFollowedArtistsListForDiscordId(discordId);
+                },
                 jsonWithExposeAnnotation()
         );
 
         post(
-                "/users/follow/:discordId/:artistId",
-                (request, response) -> spotifyService.followArtist(
-                        request.params(":artistId"), request.params(":discordId")
-                ),
-                jsonWithExposeAnnotation()
+                "/users/follow/:sessionId/:artistId",
+                (request, response) -> {
+                    String discordId = appSessionService.getDiscordIdFromSessionId(
+                            request.params(":sessionId")
+                    );
 
+                    spotifyService.followArtist(
+                            request.params(":artistId"), discordId
+                    );
+
+                    response.status(201);
+                    return "FOLLOWED";
+                },
+                jsonWithExposeAnnotation()
         );
 
         delete(
-                "/users/follow/:discordId/:artistId",
-                (request, response) -> spotifyService.unfollowArtist(
-                        request.params(":artistId"), request.params(":discordId")
-                ),
+                "/users/follow/:sessionId/:artistId",
+                (request, response) -> {
+                    String discordId = appSessionService.getDiscordIdFromSessionId(
+                            request.params(":sessionId")
+                    );
+
+                    spotifyService.unfollowArtist(
+                            request.params(":artistId"), discordId
+                    );
+
+                    response.status(200);
+                    return "DELETED";
+                },
                 jsonWithExposeAnnotation()
 
         );
