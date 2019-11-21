@@ -7,6 +7,7 @@ import java.util.List;
 import com.rotunomp.discordBot.app.SessionFactoryInstance;
 import com.rotunomp.discordBot.models.SpotifyUser;
 import com.rotunomp.discordBot.models.AppSession;
+import com.rotunomp.discordBot.app.Properties;
 
 import com.sun.org.apache.xerces.internal.util.SynchronizedSymbolTable;
 import org.apache.http.Consts;
@@ -32,9 +33,9 @@ import org.hibernate.SessionFactory;
 public class DiscordService {
     private final String API_TOKEN = "https://discordapp.com/api/v6/oauth2/token";
     private final String API_USER = "https://discordapp.com/api/v6/users/@me";
-    private final String CLIENT_ID = "332269999912132097";
-    private final String CLIENT_SECRET = "937it3ow87i4ery69876wqire";
-    private final String REDIRECT_URI = "https://botify.michaelrotuno.dev/oauth/discord";
+    private final String CLIENT_ID = Properties.get("discord_client_id");
+    private final String CLIENT_SECRET = Properties.get("discord_client_secret");
+    private final String REDIRECT_URI = "https://botify.michaelrotuno.dev/oauth";
 
     private CloseableHttpClient httpClient;
     private SessionFactory sessionFactory;
@@ -61,6 +62,9 @@ public class DiscordService {
 
         // Get the access token and refresh token
         JSONObject tokenResponseJson = exchangeCodeForTokens(code);
+
+	System.out.println("Token response: " + tokenResponseJson);
+
         String accessToken = tokenResponseJson.getString("access_token");
         String refreshToken = tokenResponseJson.getString("refresh_token");
 
@@ -69,7 +73,7 @@ public class DiscordService {
         JSONObject discordUserResponseJson = getDiscordUserInfo(accessToken);
         String discordId = discordUserResponseJson.getString("id");
 
-        
+
         // Check if the user exists in the database, and if it doesn't create an entry
         SpotifyUser user = getOrCreateUser(discordId);
 
@@ -85,6 +89,7 @@ public class DiscordService {
         params.add(new BasicNameValuePair("client_secret", CLIENT_SECRET));
         params.add(new BasicNameValuePair("grant_type", "authorization_code"));
         params.add(new BasicNameValuePair("code", code));
+	params.add(new BasicNameValuePair("redirect_uri", REDIRECT_URI));
         params.add(new BasicNameValuePair("scope", "identify"));
 
         return new UrlEncodedFormEntity(params, Consts.UTF_8);
