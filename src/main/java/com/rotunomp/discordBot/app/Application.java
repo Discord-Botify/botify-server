@@ -6,6 +6,7 @@ import com.rotunomp.discordBot.listener.ReactionListener;
 import com.rotunomp.discordBot.listener.ServerListener;
 import com.rotunomp.discordBot.models.FollowedArtist;
 import com.rotunomp.discordBot.restControllers.SpotifyRestController;
+import com.rotunomp.discordBot.restControllers.DiscordRestController;
 import com.rotunomp.discordBot.services.SpotifyService;
 import com.rotunomp.discordBot.threads.AlbumNotificationThread;
 import net.dv8tion.jda.api.AccountType;
@@ -32,7 +33,7 @@ public class Application {
 
         // Start the REST API
         new SpotifyRestController();
-
+	new DiscordRestController();
     }
 
 }

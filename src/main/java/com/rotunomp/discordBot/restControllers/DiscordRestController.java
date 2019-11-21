@@ -2,6 +2,7 @@ package com.rotunomp.discordBot.restControllers;
 
 import static com.rotunomp.discordBot.app.JsonUtil.*;
 import static spark.Spark.*;
+import com.rotunomp.discordBot.app.Properties;
 
 import java.io.OutputStreamWriter;
 import java.util.HashMap;
@@ -17,6 +18,7 @@ import com.rotunomp.discordBot.services.AppSessionService;
 import com.rotunomp.discordBot.services.DiscordService;
 
 import static com.rotunomp.discordBot.app.JsonUtil.*;
+import java.awt.*;
 
 /**
  * DiscordRestController
@@ -29,6 +31,7 @@ public class DiscordRestController {
     public DiscordRestController() {
         discordService = DiscordService.getInstance();
         appSessionService = AppSessionService.getInstance();
+
         options("/*",
                 (request, response) -> {
 
@@ -49,11 +52,14 @@ public class DiscordRestController {
                     return "OK";
                 });
 
-        before((request, response) -> response.header("Access-Control-Allow-Origin", "*"));
-
+        before("/*", (request, response) -> {
+	    response.header("Access-Control-Allow-Origin", "*");
+	    response.header("Access-Control-Allow-Headers", "*");
+	    response.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+	    response.type("application/json");
+	});
 
         post("/oauth/discord", (request, response) -> {
-            response.type("application/json");
 
             // Login the user through Discord OAuth and get their Discord user info
             // Also create them in the database if they don't exist
@@ -66,12 +72,24 @@ public class DiscordRestController {
             String discordId = returnJson.getString("id");
             String appSessionId = appSessionService.startAppSession(discordId);
 
+	    // Put redirect in the response
+	    response.redirect("/home");
+	    response.status(201);
+
             // Return the session ID and the user info in JSON format
             returnJson.append("sessionId", appSessionId);
-            return returnJson;
-        }, jsonWithExposeAnnotation());
+	    System.out.println("ReturnJson: " + returnJson.toString());
+            return "";
+        }, json());
 
+	post("/test", "application/json", (request, response) -> {
+    	    response.status(200);
+	    System.out.println("In the POST test!");
 
+	    return new Color(1);
+	}, json());
+
+	get("/testget", (request, response) -> "Hello!", json());
     }
 
 }
