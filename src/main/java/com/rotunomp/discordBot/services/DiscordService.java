@@ -6,10 +6,8 @@ import java.util.List;
 
 import com.rotunomp.discordBot.app.SessionFactoryInstance;
 import com.rotunomp.discordBot.models.SpotifyUser;
-import com.rotunomp.discordBot.models.AppSession;
 import com.rotunomp.discordBot.app.Properties;
 
-import com.sun.org.apache.xerces.internal.util.SynchronizedSymbolTable;
 import org.apache.http.Consts;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -18,7 +16,6 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
@@ -63,7 +60,7 @@ public class DiscordService {
         // Get the access token and refresh token
         JSONObject tokenResponseJson = exchangeCodeForTokens(code);
 
-	System.out.println("Token response: " + tokenResponseJson);
+	    System.out.println("Token response: " + tokenResponseJson);
 
         String accessToken = tokenResponseJson.getString("access_token");
         String refreshToken = tokenResponseJson.getString("refresh_token");
@@ -89,7 +86,7 @@ public class DiscordService {
         params.add(new BasicNameValuePair("client_secret", CLIENT_SECRET));
         params.add(new BasicNameValuePair("grant_type", "authorization_code"));
         params.add(new BasicNameValuePair("code", code));
-	params.add(new BasicNameValuePair("redirect_uri", REDIRECT_URI));
+	    params.add(new BasicNameValuePair("redirect_uri", REDIRECT_URI));
         params.add(new BasicNameValuePair("scope", "identify"));
 
         return new UrlEncodedFormEntity(params, Consts.UTF_8);
