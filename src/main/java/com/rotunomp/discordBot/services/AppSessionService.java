@@ -26,10 +26,12 @@ public class AppSessionService {
     // Start a new app session, which is a session id mapped to a discord id
     public String startAppSession(String discordId) {
         Session hibernateSession = sessionFactory.openSession();
+        hibernateSession.beginTransaction();
 
         AppSession appSession = new AppSession();
         appSession.setDiscordId(discordId);
         hibernateSession.persist(appSession);
+        hibernateSession.getTransaction().commit();
 
         return appSession.getSessionId();
     }
