@@ -20,9 +20,7 @@ public class AppSession {
     @Expose
     private String discordId;
 
-    public AppSession(String discordId) {
-        this.discordId = discordId;
-    }
+    public AppSession() {}
 
     public String getSessionId() {
         return sessionId;

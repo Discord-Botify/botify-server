@@ -27,7 +27,8 @@ public class AppSessionService {
     public String startAppSession(String discordId) {
         Session hibernateSession = sessionFactory.openSession();
 
-        AppSession appSession = new AppSession(discordId);
+        AppSession appSession = new AppSession();
+        appSession.setDiscordId(discordId);
         hibernateSession.persist(appSession);
 
         return appSession.getSessionId();
