@@ -3,3 +3,8 @@ config.properties
 src/main/resources/hibernate.properties
 
 target/**
+
+.classpath
+.project
+.settings/**
+.vscode/**

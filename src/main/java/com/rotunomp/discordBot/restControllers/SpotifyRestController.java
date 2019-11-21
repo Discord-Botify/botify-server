@@ -12,6 +12,35 @@ public class SpotifyRestController {
 
     public SpotifyRestController() {
         spotifyService = SpotifyService.getService();
+        String code;
+
+        // Set up SSL
+        String keyStoreLocation = Properties.get("ssl_certificate_location");
+        String keyStorePassword = Properties.get("ssl_password");
+        secure(keyStoreLocation, keyStorePassword, null, null);
+
+        options("/*",
+                (request, response) -> {
+
+                    String accessControlRequestHeaders = request
+                            .headers("Access-Control-Request-Headers");
+                    if (accessControlRequestHeaders != null) {
+                        response.header("Access-Control-Allow-Headers",
+                                accessControlRequestHeaders);
+                    }
+
+                    String accessControlRequestMethod = request
+                            .headers("Access-Control-Request-Method");
+                    if (accessControlRequestMethod != null) {
+                        response.header("Access-Control-Allow-Methods",
+                                accessControlRequestMethod);
+                    }
+
+                    return "OK";
+                });
+
+        before((request, response) -> response.header("Access-Control-Allow-Origin", "*"));
+
 
         // Get all artists in the database (proof of concept, not very functional)
         get("/artists",
@@ -19,9 +48,10 @@ public class SpotifyRestController {
                 jsonWithExposeAnnotation()
         );
 
-        // Get all a user's followed artists in the database (based on a user's Spotify id)
+        // Get discord ID from session ID
+        // Get all a user's followed artists in the database from discord ID
         get(
-                "/users",
+                "/users/:sessionId",
                 (request, response) -> spotifyService.getFollowedArtistsListForSpotifyId(
                         request.params("spotifyUserId")
                 ),
@@ -29,18 +59,18 @@ public class SpotifyRestController {
         );
 
         post(
-                "/users/follow/{discordId}/{artistId}",
+                "/users/follow/:discordId/:artistId",
                 (request, response) -> spotifyService.followArtist(
-                        request.params("artistId"), request.params("discordId")
+                        request.params(":artistId"), request.params(":discordId")
                 ),
                 jsonWithExposeAnnotation()
 
         );
 
         delete(
-                "/users/follow/{discordId}/{artistId}",
+                "/users/follow/:discordId/:artistId",
                 (request, response) -> spotifyService.unfollowArtist(
-                        request.params("artistId"), request.params("discordId")
+                        request.params(":artistId"), request.params(":discordId")
                 ),
                 jsonWithExposeAnnotation()
 
