@@ -22,9 +22,9 @@ public class SpotifyRestController {
                 jsonWithExposeAnnotation()
         );
 
-        // Get discord ID from session ID
+        // Get List of followed artists from session ID
         get(
-                "/users/:sessionId",
+                "/users/follow/:sessionId",
                 (request, response) -> {
                     String discordId = appSessionService.getDiscordIdFromSessionId(
                             request.params(":sessionId")
