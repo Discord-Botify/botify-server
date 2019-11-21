@@ -1,12 +1,9 @@
 package com.rotunomp.discordBot.app;
 
-import com.google.gson.Gson;
 import com.rotunomp.discordBot.listener.PrivateListener;
 import com.rotunomp.discordBot.listener.ReactionListener;
 import com.rotunomp.discordBot.listener.ServerListener;
-import com.rotunomp.discordBot.models.FollowedArtist;
-import com.rotunomp.discordBot.restControllers.SpotifyRestController;
-import com.rotunomp.discordBot.services.SpotifyService;
+import com.rotunomp.discordBot.restControllers.RestController;
 import com.rotunomp.discordBot.threads.AlbumNotificationThread;
 import net.dv8tion.jda.api.AccountType;
 import net.dv8tion.jda.api.JDA;
@@ -14,7 +11,6 @@ import net.dv8tion.jda.api.JDABuilder;
 
 
 import javax.security.auth.login.LoginException;
-import java.util.List;
 
 public class Application {
 
@@ -31,8 +27,7 @@ public class Application {
         thread.start();
 
         // Start the REST API
-        new SpotifyRestController();
-
+        new RestController();
     }
 
 }

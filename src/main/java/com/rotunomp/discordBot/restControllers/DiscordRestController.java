@@ -2,6 +2,7 @@ package com.rotunomp.discordBot.restControllers;
 
 import static com.rotunomp.discordBot.app.JsonUtil.*;
 import static spark.Spark.*;
+import com.rotunomp.discordBot.app.Properties;
 
 import java.io.OutputStreamWriter;
 import java.util.HashMap;
@@ -17,43 +18,20 @@ import com.rotunomp.discordBot.services.AppSessionService;
 import com.rotunomp.discordBot.services.DiscordService;
 
 import static com.rotunomp.discordBot.app.JsonUtil.*;
+import java.awt.*;
 
 /**
  * DiscordRestController
  */
 public class DiscordRestController {
-    String code;
-    DiscordService discordService;
-    AppSessionService appSessionService;
+    private DiscordService discordService;
+    private AppSessionService appSessionService;
 
     public DiscordRestController() {
         discordService = DiscordService.getInstance();
         appSessionService = AppSessionService.getInstance();
-        options("/*",
-                (request, response) -> {
-
-                    String accessControlRequestHeaders = request
-                            .headers("Access-Control-Request-Headers");
-                    if (accessControlRequestHeaders != null) {
-                        response.header("Access-Control-Allow-Headers",
-                                accessControlRequestHeaders);
-                    }
-
-                    String accessControlRequestMethod = request
-                            .headers("Access-Control-Request-Method");
-                    if (accessControlRequestMethod != null) {
-                        response.header("Access-Control-Allow-Methods",
-                                accessControlRequestMethod);
-                    }
-
-                    return "OK";
-                });
-
-        before((request, response) -> response.header("Access-Control-Allow-Origin", "*"));
-
 
         post("/oauth/discord", (request, response) -> {
-            response.type("application/json");
 
             // Login the user through Discord OAuth and get their Discord user info
             // Also create them in the database if they don't exist
@@ -66,11 +44,14 @@ public class DiscordRestController {
             String discordId = returnJson.getString("id");
             String appSessionId = appSessionService.startAppSession(discordId);
 
+            // Set status to 201
+            response.status(201);
+
             // Return the session ID and the user info in JSON format
             returnJson.append("sessionId", appSessionId);
+            System.out.println("ReturnJson: " + returnJson.toString());
             return returnJson;
-        }, jsonWithExposeAnnotation());
-
+        }, json());
 
     }
 
