@@ -44,8 +44,7 @@ public class DiscordRestController {
             String discordId = returnJson.getString("id");
             String appSessionId = appSessionService.startAppSession(discordId);
 
-            // Put redirect in the response
-            response.redirect("/home");
+            // Set status to 201
             response.status(201);
 
             // Return the session ID and the user info in JSON format
