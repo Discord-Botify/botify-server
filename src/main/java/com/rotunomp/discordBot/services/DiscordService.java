@@ -55,6 +55,9 @@ public class DiscordService {
 
         // Get the access token and refresh token
         JSONObject tokenResponseJson = exchangeCodeForTokens(code);
+
+	System.out.println("token response: " + tokenResponseJson.toString());
+
         String accessToken = tokenResponseJson.getString("access_token");
         String refreshToken = tokenResponseJson.getString("refresh_token");
 
@@ -77,13 +80,16 @@ public class DiscordService {
 
         return "{" + "\"client_id\": \"" + CLIENT_ID + "\"," + "\"client_secret\": \"" + CLIENT_SECRET + "\","
                 + "\"grant_type\": \"authorization_code\"," + "\"code\": \"" + code + "\"," + "\"redirect_uri\": \"" + REDIRECT_URI
-                + "\"," + "\"scope\": \"identify email connections\"" + "}";
+                + "\"," + "\"scope\": \"identify\"" + "}";
     }
 
     // Exchange code for access token and refresh token with the Discord API
     private JSONObject exchangeCodeForTokens(String code) throws ClientProtocolException, IOException {
         HttpPost httpPost = new HttpPost(API_TOKEN);
         String tokenExchangeBody = getTokenExchangeBody(code);
+
+	System.out.println("token exchange body: " + tokenExchangeBody);
+
         StringEntity tokenEntity = new StringEntity(tokenExchangeBody);
         httpPost.setEntity(tokenEntity);
         httpPost.setHeader("Content-type", "application/x-www-form-urlencoded");   
