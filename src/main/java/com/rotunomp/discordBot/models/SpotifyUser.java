@@ -1,6 +1,5 @@
 package com.rotunomp.discordBot.models;
 
-import com.fasterxml.jackson.annotation.*;
 import com.google.gson.annotations.Expose;
 
 import javax.persistence.*;
