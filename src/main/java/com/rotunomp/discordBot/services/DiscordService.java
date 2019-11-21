@@ -90,7 +90,6 @@ public class DiscordService {
         httpPost.setHeader("Content-type", "application/x-www-form-urlencoded");   
         CloseableHttpResponse response = httpClient.execute(httpPost);
         JSONObject tokenResponseJson = new JSONObject (EntityUtils.toString(response.getEntity()));
-        
         return tokenResponseJson;
     }
     

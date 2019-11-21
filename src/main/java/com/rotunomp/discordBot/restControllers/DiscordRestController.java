@@ -24,40 +24,12 @@ import java.awt.*;
  * DiscordRestController
  */
 public class DiscordRestController {
-    String code;
-    DiscordService discordService;
-    AppSessionService appSessionService;
+    private DiscordService discordService;
+    private AppSessionService appSessionService;
 
     public DiscordRestController() {
         discordService = DiscordService.getInstance();
         appSessionService = AppSessionService.getInstance();
-
-        options("/*",
-                (request, response) -> {
-
-                    String accessControlRequestHeaders = request
-                            .headers("Access-Control-Request-Headers");
-                    if (accessControlRequestHeaders != null) {
-                        response.header("Access-Control-Allow-Headers",
-                                accessControlRequestHeaders);
-                    }
-
-                    String accessControlRequestMethod = request
-                            .headers("Access-Control-Request-Method");
-                    if (accessControlRequestMethod != null) {
-                        response.header("Access-Control-Allow-Methods",
-                                accessControlRequestMethod);
-                    }
-
-                    return "OK";
-                });
-
-        before("/*", (request, response) -> {
-	    response.header("Access-Control-Allow-Origin", "*");
-	    response.header("Access-Control-Allow-Headers", "*");
-	    response.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-	    response.type("application/json");
-	});
 
         post("/oauth/discord", (request, response) -> {
 
@@ -72,24 +44,16 @@ public class DiscordRestController {
             String discordId = returnJson.getString("id");
             String appSessionId = appSessionService.startAppSession(discordId);
 
-	    // Put redirect in the response
-	    response.redirect("/home");
-	    response.status(201);
+            // Put redirect in the response
+            response.redirect("/home");
+            response.status(201);
 
             // Return the session ID and the user info in JSON format
             returnJson.append("sessionId", appSessionId);
-	    System.out.println("ReturnJson: " + returnJson.toString());
-            return "";
+            System.out.println("ReturnJson: " + returnJson.toString());
+            return returnJson;
         }, json());
 
-	post("/test", "application/json", (request, response) -> {
-    	    response.status(200);
-	    System.out.println("In the POST test!");
-
-	    return new Color(1);
-	}, json());
-
-	get("/testget", (request, response) -> "Hello!", json());
     }
 
 }
