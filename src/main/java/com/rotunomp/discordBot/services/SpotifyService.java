@@ -15,6 +15,7 @@ import com.wrapper.spotify.model_objects.specification.AlbumSimplified;
 import com.wrapper.spotify.model_objects.specification.Artist;
 import com.wrapper.spotify.requests.authorization.client_credentials.ClientCredentialsRequest;
 import com.wrapper.spotify.requests.data.albums.GetAlbumRequest;
+import com.wrapper.spotify.requests.data.artists.GetArtistRequest;
 import com.wrapper.spotify.requests.data.artists.GetArtistsAlbumsRequest;
 import com.wrapper.spotify.requests.data.artists.GetSeveralArtistsRequest;
 import com.wrapper.spotify.requests.data.search.simplified.SearchArtistsRequest;
@@ -156,8 +157,6 @@ public class SpotifyService {
             String artistId = apiArtist.getId();
             artistName = apiArtist.getName();
 
-            // TODO: Account for the user potentially not entering the artist they actually want
-
             // Get the artist from the DB. If the artist does not exist, create it
             FollowedArtist followedArtist = session.get(FollowedArtist.class, artistId);
             if (followedArtist == null) {
@@ -194,6 +193,57 @@ public class SpotifyService {
         }
 
         return "Failure adding" + artistName;
+    }
+
+    public String followArtistById(String artistId, String userId) {
+        Session session = sessionFactory.openSession();
+        Transaction tx = null;
+
+        try {
+            tx = session.beginTransaction();
+
+            // Get the artist's name from the Spotify API
+            GetArtistRequest artistRequest = spotifyApi.getArtist(artistId).build();
+            Artist artist = artistRequest.execute();
+            String artistName = artist.getName();
+
+            // Get the artist from the DB. If the artist does not exist, create it
+            FollowedArtist followedArtist = session.get(FollowedArtist.class, artistId);
+            if (followedArtist == null) {
+                followedArtist = new FollowedArtist();
+                followedArtist.setId(artistId);
+                followedArtist.setName(artistName);
+                followedArtist.setAlbumCount(getArtistsAlbums(artistId).size());
+                session.save(followedArtist);
+            }
+
+            // Get the user from the DB. If the user does not exist, create it
+            SpotifyUser user = session.get(SpotifyUser.class, userId);
+            if (user == null) {
+                user = new SpotifyUser();
+                user.setId(userId);
+                session.save(user);
+            }
+
+            // Add the user to the artist
+            followedArtist.getFollowers().add(user);
+            session.persist(followedArtist);
+
+            tx.commit();
+
+            return "Success adding " + artistName;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            if(tx != null) {
+                session.getTransaction().rollback();
+            }
+        } finally {
+            session.close();
+        }
+
+        return "Failure adding" + artistId;
+
     }
 
     public synchronized List<Artist> getArtistList(List<FollowedArtist> artists) {

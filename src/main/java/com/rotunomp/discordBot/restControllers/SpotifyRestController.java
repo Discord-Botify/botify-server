@@ -42,7 +42,7 @@ public class SpotifyRestController {
                             request.params(":sessionId")
                     );
 
-                    spotifyService.followArtist(
+                    spotifyService.followArtistById(
                             request.params(":artistId"), discordId
                     );
 
