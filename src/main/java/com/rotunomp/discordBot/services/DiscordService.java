@@ -78,14 +78,6 @@ public class DiscordService {
         return discordUserResponseJson;
     }
 
-    // Build the request body for getting a user's Discord token
-//    private String getTokenExchangeBody(String code) {
-//
-//        return "{" + "\"client_id\": \"" + CLIENT_ID + "\"," + "\"client_secret\": \"" + CLIENT_SECRET + "\","
-//                + "\"grant_type\": \"authorization_code\"," + "\"code\": \"" + code + "\"," + "\"redirect_uri\": \"" + REDIRECT_URI
-//                + "\"," + "\"scope\": \"identify email connections\"" + "}";
-//    }
-
     // Build the params needed to exchange for a token with Discord
     private UrlEncodedFormEntity getDiscordTokenExchangeParams(String code) {
         List<NameValuePair> params = new ArrayList<>();
