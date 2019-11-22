@@ -9,26 +9,26 @@ import java.util.Set;
 @Entity
 @Table(name = "SpotifyUser", catalog = "discord_bot", uniqueConstraints = {
         @UniqueConstraint(columnNames = "user_id")})
-public class SpotifyUser {
+public class AppUser {
 
     @Id
     @Column(name = "user_id")
     @Expose
-    private String id;
+    private String discordId;
     @Expose
     private String spotifyId;
     @ManyToMany(mappedBy = "followers", fetch = FetchType.EAGER)
     @Expose
     private Set<FollowedArtist> followedArtists = new HashSet<>();
 
-    public SpotifyUser() {}
+    public AppUser() {}
 
-    public String getId() {
-        return id;
+    public String getDiscordId() {
+        return discordId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setDiscordId(String discordId) {
+        this.discordId = discordId;
     }
 
     public Set<FollowedArtist> getFollowedArtists() {

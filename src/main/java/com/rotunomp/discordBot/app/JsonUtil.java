@@ -5,7 +5,7 @@ import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.rotunomp.discordBot.models.FollowedArtist;
-import com.rotunomp.discordBot.models.SpotifyUser;
+import com.rotunomp.discordBot.models.AppUser;
 import spark.ResponseTransformer;
 
 public class JsonUtil {
@@ -34,7 +34,7 @@ public class JsonUtil {
     }
 
     private static String toJsonExcludeSpotifyUser(Object object) {
-        return excludeClass(object, SpotifyUser.class);
+        return excludeClass(object, AppUser.class);
     }
 
     private static String toJsonExcludeArtist(Object object) {

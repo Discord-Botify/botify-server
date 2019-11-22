@@ -3,6 +3,7 @@ import com.google.gson.Gson;
 import com.rotunomp.discordBot.app.Properties;
 import com.rotunomp.discordBot.services.AppSessionService;
 import com.rotunomp.discordBot.services.SpotifyService;
+import org.json.JSONObject;
 
 import static spark.Spark.*;
 import static com.rotunomp.discordBot.app.JsonUtil.*;
@@ -35,6 +36,7 @@ public class SpotifyRestController {
                 jsonWithExposeAnnotation()
         );
 
+        // Follow an artist
         post(
                 "/users/follow/:sessionId/:artistId",
                 (request, response) -> {
@@ -52,6 +54,7 @@ public class SpotifyRestController {
                 jsonWithExposeAnnotation()
         );
 
+        // Delete a follow
         delete(
                 "/users/follow/:sessionId/:artistId",
                 (request, response) -> {
@@ -68,6 +71,23 @@ public class SpotifyRestController {
                 },
                 jsonWithExposeAnnotation()
 
+        );
+
+        // Spotify oauth
+        post(
+                "/oauth/spotify",
+                ((request, response) -> {
+                    // Get the access tokens from the Spotify API
+                    String body = request.body();
+                    JSONObject jsonBody = new JSONObject(body);
+                    String code = jsonBody.getString("code");
+                    JSONObject accessTokenJson = spotifyService.exchangeCodeForTokens(code);
+
+                    // Add refresh token to the corresponding user object
+
+                    return "";
+                }),
+                json()
         );
 
     }

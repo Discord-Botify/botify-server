@@ -1,6 +1,5 @@
 package com.rotunomp.discordBot.models;
 
-import com.fasterxml.jackson.annotation.*;
 import com.google.gson.annotations.Expose;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,7 +27,7 @@ public class FollowedArtist implements Comparable<FollowedArtist> {
             joinColumns = { @JoinColumn(name = "artist_id") },
             inverseJoinColumns = { @JoinColumn(name = "user_id") }
     )
-    private Set<SpotifyUser> followers = new HashSet<>();
+    private Set<AppUser> followers = new HashSet<>();
 
     public FollowedArtist() {}
 
@@ -56,11 +55,11 @@ public class FollowedArtist implements Comparable<FollowedArtist> {
         this.albumCount = albumCount;
     }
 
-    public Set<SpotifyUser> getFollowers() {
+    public Set<AppUser> getFollowers() {
         return followers;
     }
 
-    public void setFollowers(Set<SpotifyUser> followers) {
+    public void setFollowers(Set<AppUser> followers) {
         this.followers = followers;
     }
 

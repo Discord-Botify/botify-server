@@ -5,7 +5,7 @@ import com.rotunomp.discordBot.app.Properties;
 import com.rotunomp.discordBot.app.SessionFactoryInstance;
 import com.rotunomp.discordBot.exceptions.ArtistNotFoundException;
 import com.rotunomp.discordBot.models.FollowedArtist;
-import com.rotunomp.discordBot.models.SpotifyUser;
+import com.rotunomp.discordBot.models.AppUser;
 import com.rotunomp.discordBot.threads.TokenRefreshThread;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
@@ -19,10 +19,21 @@ import com.wrapper.spotify.requests.data.artists.GetArtistRequest;
 import com.wrapper.spotify.requests.data.artists.GetArtistsAlbumsRequest;
 import com.wrapper.spotify.requests.data.artists.GetSeveralArtistsRequest;
 import com.wrapper.spotify.requests.data.search.simplified.SearchArtistsRequest;
+import org.apache.http.Consts;
+import org.apache.http.HttpEntity;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.*;
@@ -34,6 +45,8 @@ public class SpotifyService {
     // This class is going to be a singleton
     private static SpotifyService serviceInstance = null;
     private SessionFactory sessionFactory;
+    private CloseableHttpClient httpClient;
+
 
     // Returns the singleton
     public static SpotifyService getService() {
@@ -71,6 +84,9 @@ public class SpotifyService {
         // Begin the token refresh thread
         TokenRefreshThread refreshThread = new TokenRefreshThread(spotifyApi);
         refreshThread.start();
+
+        // HttpClient for oauth
+        this.httpClient = HttpClients.createDefault();
     }
 
     public String getAlbumNameById(String albumId) {
@@ -168,10 +184,10 @@ public class SpotifyService {
             }
 
             // Get the user from the DB. If the user does not exist, create it
-            SpotifyUser user = session.get(SpotifyUser.class, userId);
+            AppUser user = session.get(AppUser.class, userId);
             if (user == null) {
-                user = new SpotifyUser();
-                user.setId(userId);
+                user = new AppUser();
+                user.setDiscordId(userId);
                 session.save(user);
             }
 
@@ -218,10 +234,10 @@ public class SpotifyService {
             }
 
             // Get the user from the DB. If the user does not exist, create it
-            SpotifyUser user = session.get(SpotifyUser.class, userId);
+            AppUser user = session.get(AppUser.class, userId);
             if (user == null) {
-                user = new SpotifyUser();
-                user.setId(userId);
+                user = new AppUser();
+                user.setDiscordId(userId);
                 session.save(user);
             }
 
@@ -312,11 +328,11 @@ public class SpotifyService {
         Transaction tx = session.beginTransaction();
         Query query = session.createQuery("from SpotifyUser where spotifyId = :spotifyId");
         query.setParameter("spotifyId", userId);
-        SpotifyUser user = (SpotifyUser) query.list().get(0);
+        AppUser user = (AppUser) query.list().get(0);
         tx.commit();
 
         // Call the method to get the list of artists based on Discord ID
-        return getFollowedArtistsListForDiscordId(user.getId());
+        return getFollowedArtistsListForDiscordId(user.getDiscordId());
     }
 
     public List<List<FollowedArtist>> getFollowedArtistInTens(String userId) {
@@ -340,7 +356,7 @@ public class SpotifyService {
 
     public Set<FollowedArtist> getFollowedArtistsForDiscordUser(String userId) {
         Session session = sessionFactory.openSession();
-        Set<FollowedArtist> followedArtists = session.get(SpotifyUser.class, userId).getFollowedArtists();
+        Set<FollowedArtist> followedArtists = session.get(AppUser.class, userId).getFollowedArtists();
         session.close();
         return followedArtists;
     }
@@ -350,7 +366,7 @@ public class SpotifyService {
         Transaction tx = session.beginTransaction();
 
         // First get the user from the database
-        SpotifyUser user = session.get(SpotifyUser.class, userId);
+        AppUser user = session.get(AppUser.class, userId);
 
         // Then get the artist from the database
         FollowedArtist artist = session.get(FollowedArtist.class, artistId);
@@ -377,5 +393,26 @@ public class SpotifyService {
     public List<FollowedArtist> getAllDatabaseArtists() {
         Session session = sessionFactory.openSession();
         return session.createQuery("FROM FollowedArtist").list();
+    }
+
+    // Exchange for tokens with Spotify
+    public JSONObject exchangeCodeForTokens(String code) throws IOException {
+        HttpPost httpPost = new HttpPost("https://accounts.spotify.com/api/token");
+        httpPost.setHeader("Content-type", "application/x-www-form-urlencoded");
+        httpPost.setEntity(getSpotifyTokenExchangeParams(code));
+        CloseableHttpResponse response = httpClient.execute(httpPost);
+        return new JSONObject(EntityUtils.toString(response.getEntity()));
+    }
+
+    // Helper to build body for token exchange
+    private HttpEntity getSpotifyTokenExchangeParams(String code) {
+        List<NameValuePair> params = new ArrayList<>();
+        params.add(new BasicNameValuePair("client_id", Properties.get("spotify_client_id")));
+        params.add(new BasicNameValuePair("client_secret", Properties.get("spotify_client_secret")));
+        params.add(new BasicNameValuePair("grant_type", "authorization_code"));
+        params.add(new BasicNameValuePair("code", code));
+        params.add(new BasicNameValuePair("redirect_uri", "https://botify.michaelrotuno.dev/oauth"));
+
+        return new UrlEncodedFormEntity(params, Consts.UTF_8);
     }
 }

@@ -2,7 +2,7 @@ package com.rotunomp.discordBot.threads;
 
 import com.rotunomp.discordBot.app.SessionFactoryInstance;
 import com.rotunomp.discordBot.models.FollowedArtist;
-import com.rotunomp.discordBot.models.SpotifyUser;
+import com.rotunomp.discordBot.models.AppUser;
 import com.rotunomp.discordBot.services.SpotifyService;
 import com.wrapper.spotify.model_objects.specification.AlbumSimplified;
 import com.wrapper.spotify.model_objects.specification.Artist;
@@ -84,9 +84,9 @@ public class AlbumNotificationThread extends Thread {
                 // we need to send the notification!
                 if(albumList.size() > dbArtist.getAlbumCount()) {
                     // Send the notification to all of the followers!
-                    for (SpotifyUser user : dbArtist.getFollowers()) {
-                        System.out.println("Follower of " + dbArtist.getName() + ": " + user.getId());
-                        sendAlbumUpdateNotification(albumList, user.getId(), apiArtist.getName());
+                    for (AppUser user : dbArtist.getFollowers()) {
+                        System.out.println("Follower of " + dbArtist.getName() + ": " + user.getDiscordId());
+                        sendAlbumUpdateNotification(albumList, user.getDiscordId(), apiArtist.getName());
                     }
                     // Also update the albumCount in the database
                     dbArtist.setAlbumCount(albumList.size());
