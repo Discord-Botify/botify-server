@@ -129,7 +129,20 @@ public class SpotifyService {
                             .limit(50)
                             .album_type("album")
                             .build();
-            return Arrays.asList(request.execute().getItems());
+            List<AlbumSimplified> albums = Arrays.asList(request.execute().getItems());
+            while (Arrays.asList(request.execute().getItems()).size() == 50) {
+                request =
+                    spotifyApi.getArtistsAlbums(artistId)
+                            .market(CountryCode.US)
+                            .limit(50)
+                            .offset(50)
+                            .album_type("album")
+                            .build();
+                for (AlbumSimplified album : Arrays.asList(request.execute().getItems())) {
+                    albums.add(album);
+                }
+            }
+            return albums;
         } catch (IOException | SpotifyWebApiException e) {
             e.printStackTrace();
         }
