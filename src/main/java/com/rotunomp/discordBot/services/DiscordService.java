@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.rotunomp.discordBot.app.SessionFactoryInstance;
-import com.rotunomp.discordBot.models.SpotifyUser;
+import com.rotunomp.discordBot.models.AppUser;
 import com.rotunomp.discordBot.app.Properties;
 
 import org.apache.http.Consts;
@@ -72,7 +72,7 @@ public class DiscordService {
 
 
         // Check if the user exists in the database, and if it doesn't create an entry
-        SpotifyUser user = getOrCreateUser(discordId);
+        AppUser user = getOrCreateUser(discordId);
 
 
         // Pass the user's info back to the front end
@@ -114,15 +114,15 @@ public class DiscordService {
         return new JSONObject(EntityUtils.toString(response.getEntity()));
     }
 
-    private SpotifyUser getOrCreateUser(String discordId) {
+    private AppUser getOrCreateUser(String discordId) {
         // Start a hibernate session
         Session session = sessionFactory.openSession();
 
         // See if a user exists, and if not add it
-        SpotifyUser user = session.get(SpotifyUser.class, discordId);
+        AppUser user = session.get(AppUser.class, discordId);
         if (user == null) {
-            user = new SpotifyUser();
-            user.setId(discordId);
+            user = new AppUser();
+            user.setDiscordId(discordId);
             session.persist(user);
         }
 
