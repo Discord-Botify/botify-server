@@ -37,18 +37,18 @@ public class ReactionListener extends ListenerAdapter {
         switch (event.getReaction().getReactionEmote().toString()) {
             //Follows artist
             case "RE:U+31U+20e3":
-                artistName = split[1].split(" \\| ")[0];
-                spotifyService.followArtist(artistName, user.getId());
+                artistId = split[1].split(" \\| ID: ")[1];
+                spotifyService.followArtistById(artistId, user.getId());
                 channel.sendMessage("Success following " + artistName).queue();
                 break;
             case "RE:U+32U+20e3":
-                artistName = split[2].split(" \\| ")[0];
-                spotifyService.followArtist(artistName, user.getId());
+                artistId = split[2].split(" \\| ID: ")[1];
+                spotifyService.followArtistById(artistId, user.getId());
                 channel.sendMessage("Success following " + artistName).queue();
                 break;
             case "RE:U+33U+20e3":
-                artistName = split[3].split(" \\| ")[0];
-                spotifyService.followArtist(artistName, user.getId());
+                artistId = split[3].split(" \\| ID: ")[1];
+                spotifyService.followArtistById(artistId, user.getId());
                 channel.sendMessage("Success following " + artistName).queue();
                 break;
 
