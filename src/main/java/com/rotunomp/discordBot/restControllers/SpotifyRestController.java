@@ -125,6 +125,29 @@ public class SpotifyRestController {
                 json()
         );
 
+        /*  Log a user out of their Spotify, thus deleting their
+        *   Spotify account records in the associated AppUser object
+        *
+        *   Params: sessionId
+        *
+        *   Body: NONE
+        *
+        *   Response: "Deleted Spotify account information"
+        */
+        delete(
+                "/oauth/spotify/:sessionId",
+                (request, response) -> {
+                    String discordId = appSessionService.getDiscordIdFromSessionId(
+                            request.params(":sessionId")
+                    );
+                    appUserService.deleteSpotifyInformation(discordId);
+
+                    response.status(200);
+                    return "Deleted Spotify account information";
+                },
+                json()
+        );
+
     }
 
     

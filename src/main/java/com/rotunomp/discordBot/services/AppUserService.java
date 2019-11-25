@@ -45,4 +45,17 @@ public class AppUserService {
         session.close();
     }
 
+    // Remove a user's Spotify Information
+    public void deleteSpotifyInformation(String discordId) {
+        Session session = sessionFactory.openSession();
+        session.beginTransaction();
+        AppUser appUser = session.get(AppUser.class, discordId);
+        appUser.setSpotifyRefreshToken("");
+        appUser.setSpotifyUserName("");
+        appUser.setSpotifyId("");
+        session.update(appUser);
+        session.getTransaction().commit();
+        session.close();
+    }
+
 }
