@@ -339,6 +339,7 @@ public class SpotifyService {
         return followedArtistList;
     }
 
+    // TODO: This method is useless so delete it?
     public List<FollowedArtist> getFollowedArtistsListForSpotifyId(String userId) {
         // Get the corresponding user in the database
         Session session = sessionFactory.openSession();
@@ -352,6 +353,8 @@ public class SpotifyService {
         return getFollowedArtistsListForDiscordId(user.getDiscordId());
     }
 
+    // Useful for the Discord unfollow interface, where artists need to
+    // be displayed in sets of ten
     public List<List<FollowedArtist>> getFollowedArtistInTens(String userId) {
         List<FollowedArtist> bigArtistList= getFollowedArtistsListForDiscordId(userId);
         List<List<FollowedArtist>> returnList = new ArrayList<>();
@@ -412,7 +415,7 @@ public class SpotifyService {
         return session.createQuery("FROM FollowedArtist").list();
     }
 
-    // Exchange for tokens with Spotify
+    // Exchange for oauth tokens with Spotify
     public JSONObject exchangeCodeForTokens(String code) throws IOException {
         HttpPost httpPost = new HttpPost("https://accounts.spotify.com/api/token");
         httpPost.setHeader("Content-type", "application/x-www-form-urlencoded");
@@ -431,5 +434,13 @@ public class SpotifyService {
         params.add(new BasicNameValuePair("redirect_uri", "https://botify.michaelrotuno.dev/oauth"));
 
         return new UrlEncodedFormEntity(params, Consts.UTF_8);
+    }
+
+    // Use an access token to get a user's Spotify information
+    public JSONObject getUsersSpotifyInfo(String accessToken) throws IOException {
+        HttpPost httpPost = new HttpPost("https://api.spotify.com/v1/me");
+        httpPost.setHeader("Authorization", accessToken);
+        CloseableHttpResponse response = httpClient.execute(httpPost);
+        return new JSONObject(EntityUtils.toString(response.getEntity()));
     }
 }

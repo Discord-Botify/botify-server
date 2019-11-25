@@ -1,7 +1,6 @@
 package com.rotunomp.discordBot.restControllers;
-import com.google.gson.Gson;
-import com.rotunomp.discordBot.app.Properties;
 import com.rotunomp.discordBot.services.AppSessionService;
+import com.rotunomp.discordBot.services.AppUserService;
 import com.rotunomp.discordBot.services.SpotifyService;
 import org.json.JSONObject;
 
@@ -12,10 +11,12 @@ public class SpotifyRestController {
 
     private SpotifyService spotifyService;
     private AppSessionService appSessionService;
+    private AppUserService appUserService;
 
     public SpotifyRestController() {
         spotifyService = SpotifyService.getService();
         appSessionService = AppSessionService.getInstance();
+        appUserService = AppUserService.getInstance();
 
         // Get all artists in the database (proof of concept, not very functional)
         get("/artists",
@@ -89,7 +90,7 @@ public class SpotifyRestController {
         *
         *   Response Body Layout:
         *   {
-        *       spotifyUsername: 'name'
+        *       spotifyUserName: 'name'
         *   }
          */
         post(
@@ -101,16 +102,25 @@ public class SpotifyRestController {
                     String code = jsonBody.getString("code");
                     JSONObject accessTokenJson = spotifyService.exchangeCodeForTokens(code);
 
-                    // Add refresh token to the corresponding user object
+                    // Get the user's Spotify information
+                    String accessToken = accessTokenJson.getString("access_token");
+                    JSONObject userInfoJson = spotifyService.getUsersSpotifyInfo(accessToken);
+
+                    // Add refresh token ans Spotify info to the corresponding user object
                     String discordId = appSessionService.getDiscordIdFromSessionId(
                             jsonBody.getString("sessionId")
                     );
+                    String spotifyId = userInfoJson.getString("id");
+                    String spotifyUserName = userInfoJson.getString("display_name");
+                    String spotifyRefreshToken = accessTokenJson.getString("refresh_token");
 
+                    appUserService.saveSpotifyInformation(
+                            discordId, spotifyId, spotifyUserName, spotifyRefreshToken
+                    );
 
-                    //
-
-
-                    return "";
+                    // Set the response status and return the appropriate user data
+                    response.status(201);
+                    return spotifyUserName;
                 }),
                 json()
         );

@@ -17,6 +17,10 @@ public class AppUser {
     private String discordId;
     @Expose
     private String spotifyId;
+    @Expose
+    private String spotifyUserName;
+    @Expose
+    private String spotifyRefreshToken;
     @ManyToMany(mappedBy = "followers", fetch = FetchType.EAGER)
     @Expose
     private Set<FollowedArtist> followedArtists = new HashSet<>();
@@ -45,5 +49,21 @@ public class AppUser {
 
     public void setSpotifyId(String spotifyId) {
         this.spotifyId = spotifyId;
+    }
+
+    public String getSpotifyUserName() {
+        return spotifyUserName;
+    }
+
+    public void setSpotifyUserName(String spotifyUserName) {
+        this.spotifyUserName = spotifyUserName;
+    }
+
+    public String getSpotifyRefreshToken() {
+        return spotifyRefreshToken;
+    }
+
+    public void setSpotifyRefreshToken(String spotifyRefreshToken) {
+        this.spotifyRefreshToken = spotifyRefreshToken;
     }
 }
