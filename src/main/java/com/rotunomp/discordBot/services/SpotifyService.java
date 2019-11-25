@@ -145,7 +145,24 @@ public class SpotifyService {
                             .limit(50)
                             .album_type("album")
                             .build();
-            return Arrays.asList(request.execute().getItems());
+            List<AlbumSimplified> albums = Arrays.asList(request.execute().getItems());
+            List<AlbumSimplified> nextFiftyAlbums = Arrays.asList(request.execute().getItems());
+            int offset = 50;
+            while (nextFiftyAlbums.size() == 50) {
+                request =
+                    spotifyApi.getArtistsAlbums(artistId)
+                            .market(CountryCode.US)
+                            .limit(50)
+                            .offset(offset)
+                            .album_type("album")
+                            .build();
+                offset+=50;
+                nextFiftyAlbums = Arrays.asList(request.execute().getItems());
+                for (AlbumSimplified album : nextFiftyAlbums) {
+                    albums.add(album);
+                }
+            }
+            return albums;
         } catch (IOException | SpotifyWebApiException e) {
             e.printStackTrace();
         }
