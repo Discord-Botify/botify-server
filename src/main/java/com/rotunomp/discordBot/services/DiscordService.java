@@ -94,6 +94,7 @@ public class DiscordService {
 
     // Exchange code for access token and refresh token with the Discord API
     private JSONObject exchangeCodeForTokens(String code) throws ClientProtocolException, IOException {
+        System.out.println("Exchanging code: " + code);
         HttpPost httpPost = new HttpPost(API_TOKEN);
         httpPost.setHeader("Content-type", "application/x-www-form-urlencoded");
         httpPost.setEntity(getDiscordTokenExchangeParams(code));
