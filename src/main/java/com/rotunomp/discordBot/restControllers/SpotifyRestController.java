@@ -32,6 +32,7 @@ public class SpotifyRestController {
                             request.params(":sessionId")
                     );
 
+                    response.status(200);
                     return spotifyService.getFollowedArtistsListForDiscordId(discordId);
                 },
                 jsonWithExposeAnnotation()
@@ -67,8 +68,8 @@ public class SpotifyRestController {
                             request.params(":artistId"), discordId
                     );
 
-                    response.status(200);
-                    return "DELETED";
+                    response.status(204);
+                    return "";
                 },
                 jsonWithExposeAnnotation()
 
@@ -90,6 +91,7 @@ public class SpotifyRestController {
         *
         *   Response Body Layout:
         *   {
+        *       status: 201
         *       spotifyUserName: 'name'
         *   }
          */
@@ -130,9 +132,9 @@ public class SpotifyRestController {
         *
         *   Params: sessionId
         *
-        *   Body: NONE
+        *   Request Body Layout: NONE
         *
-        *   Response: "Deleted Spotify account information"
+        *   Response: 204
         */
         delete(
                 "/oauth/spotify/:sessionId",
@@ -142,8 +144,8 @@ public class SpotifyRestController {
                     );
                     appUserService.deleteSpotifyInformation(discordId);
 
-                    response.status(200);
-                    return "Deleted Spotify account information";
+                    response.status(204);
+                    return "";
                 },
                 json()
         );
