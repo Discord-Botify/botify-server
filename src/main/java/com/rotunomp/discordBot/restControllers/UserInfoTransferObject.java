@@ -4,8 +4,10 @@ public class UserInfoTransferObject {
     private String appSessionId;
     private String discordName;
     private String discordDiscriminator;
+    private boolean isSignedIntoSpotify;
 
     public UserInfoTransferObject() {
+        this.isSignedIntoSpotify = false;
     }
 
     public String getAppSessionId() {

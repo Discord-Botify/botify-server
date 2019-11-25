@@ -73,7 +73,25 @@ public class SpotifyRestController {
 
         );
 
-        // Spotify oauth
+
+        /*  Spotify oauth:
+        *   Receives a code for Spotify oauth. Retrieves the access and refresh tokens
+        *   for a Spotify account, and gets the username for display in the app. Saves
+        *   the refresh token and username in the database for future use.
+        *
+        *   Params: NONE
+        *
+        *   Request Body Layout:
+        *   {
+        *       code: 'code'
+        *       sessionId: 'sessionId'
+        *   }
+        *
+        *   Response Body Layout:
+        *   {
+        *       spotifyUsername: 'name'
+        *   }
+         */
         post(
                 "/oauth/spotify",
                 ((request, response) -> {
@@ -84,6 +102,13 @@ public class SpotifyRestController {
                     JSONObject accessTokenJson = spotifyService.exchangeCodeForTokens(code);
 
                     // Add refresh token to the corresponding user object
+                    String discordId = appSessionService.getDiscordIdFromSessionId(
+                            jsonBody.getString("sessionId")
+                    );
+
+
+                    //
+
 
                     return "";
                 }),
