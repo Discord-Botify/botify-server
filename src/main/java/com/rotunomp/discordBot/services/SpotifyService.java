@@ -101,7 +101,7 @@ public class SpotifyService {
         return "Cannot find album: " + albumId;
     }
 
-    private List<Artist> searchArtistsByName(String artistName, int listSize) throws ArtistNotFoundException, IOException {
+    public List<Artist> searchArtistsByName(String artistName, int listSize) throws ArtistNotFoundException, IOException {
         SearchArtistsRequest request = spotifyApi.searchArtists(artistName).limit(listSize).build();
         try {
             return Arrays.asList(request.execute().getItems());

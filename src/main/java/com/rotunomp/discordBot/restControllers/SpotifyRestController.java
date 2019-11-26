@@ -24,6 +24,23 @@ public class SpotifyRestController {
                 jsonWithExposeAnnotation()
         );
 
+        /*  Search Spotify for a name and return 5 artists
+         *
+         *   Params: searchString
+         *
+         *   Request Body Layout: NONE
+         *
+         *   Response Body Layout:
+         *   status: 200
+         *   {
+         *
+         *   }
+         */
+        get("/searchArtists/:searchString", (request, response) -> {
+            response.status(200);
+            return spotifyService.searchArtistsByName(request.params(":searchString"), 5);
+        }, jsonWithExposeAnnotation());
+
         // Get List of followed artists from session ID
         get(
                 "/users/follow/:sessionId",
@@ -90,8 +107,8 @@ public class SpotifyRestController {
         *   }
         *
         *   Response Body Layout:
+        *   status: 201
         *   {
-        *       status: 201
         *       spotifyUserName: 'name'
         *   }
          */

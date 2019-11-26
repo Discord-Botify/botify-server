@@ -41,6 +41,14 @@ public class AppSessionService {
         return hibernateSession.get(AppSession.class, sessionId).getDiscordId();
     }
 
-    // TODO delete a session based on ID
+    public void deleteAppSession(String sessionId) {
+        Session hibernateSession = sessionFactory.openSession();
+        hibernateSession.beginTransaction();
+
+        AppSession appSession = new AppSession();
+        appSession.setSessionId(sessionId);
+        hibernateSession.delete(appSession);
+        hibernateSession.getTransaction().commit();
+    }
 
 }
