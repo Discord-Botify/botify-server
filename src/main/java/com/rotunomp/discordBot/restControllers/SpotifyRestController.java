@@ -39,7 +39,7 @@ public class SpotifyRestController {
         get("/searchArtists/:searchString", (request, response) -> {
             response.status(200);
             return spotifyService.searchArtistsByName(request.params(":searchString"), 5);
-        }, jsonWithExposeAnnotation());
+        }, json());
 
         // Get List of followed artists from session ID
         get(
