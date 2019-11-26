@@ -125,6 +125,8 @@ public class DiscordService {
             user = new AppUser();
             user.setDiscordId(discordId);
             session.persist(user);
+
+            // TODO: Message the user on Discord for the first time to start the message chain
         }
 
         return user;

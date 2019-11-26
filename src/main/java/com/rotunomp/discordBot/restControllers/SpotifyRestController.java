@@ -38,7 +38,14 @@ public class SpotifyRestController {
          *   Response Body Layout:
          *   status: 200
          *   {
-         *
+         *      [
+         *          ...
+         *          {
+         *              id: 'artistId',
+         *              name: 'artistName'
+         *          },
+         *          ...
+         *      ]
          *   }
          */
         get("/searchArtists/:searchString", (request, response) -> {
@@ -57,7 +64,25 @@ public class SpotifyRestController {
             return followedArtists;
         }, jsonWithExposeAnnotation());
 
-        // Get List of followed artists from session ID
+        /*   Get a user's followed artists
+         *
+         *   Params: sessionId
+         *
+         *   Request Body Layout: NONE
+         *
+         *   Response Body Layout:
+         *   status: 200
+         *   {
+         *      [
+         *          ...
+         *          {
+         *              id: 'artistId',
+         *              name: 'artistName'
+         *          },
+         *          ...
+         *      ]
+         *   }
+         */
         get(
                 "/users/follow/:sessionId",
                 (request, response) -> {
@@ -71,7 +96,14 @@ public class SpotifyRestController {
                 jsonWithExposeAnnotation()
         );
 
-        // Follow an artist
+        /*   Follow an artist
+         *
+         *   Params: sessionId, artistId
+         *
+         *   Request Body Layout: NONE
+         *
+         *   Response: 201
+         */
         post(
                 "/users/follow/:sessionId/:artistId",
                 (request, response) -> {
@@ -89,7 +121,14 @@ public class SpotifyRestController {
                 jsonWithExposeAnnotation()
         );
 
-        // Delete a follow
+        /*   Delete a artist from a user's follows
+         *
+         *   Params: sessionId, artistId
+         *
+         *   Request Body Layout: NONE
+         *
+         *   Response: 204
+         */
         delete(
                 "/users/follow/:sessionId/:artistId",
                 (request, response) -> {
