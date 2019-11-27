@@ -6,6 +6,8 @@ import com.google.gson.annotations.Expose;
 
 import org.hibernate.annotations.GenericGenerator;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "AppSession", catalog = "discord_bot", uniqueConstraints = {
         @UniqueConstraint(columnNames = "session_id")})
@@ -19,6 +21,7 @@ public class AppSession {
     private String sessionId;
     @Expose
     private String discordId;
+    private LocalDate lastTimeUsed;
 
     public AppSession() {}
 
@@ -37,5 +40,12 @@ public class AppSession {
     public void setDiscordId(String discordId) {
         this.discordId = discordId;
     }
-    
+
+    public LocalDate getLastTimeUsed() {
+        return lastTimeUsed;
+    }
+
+    public void setLastTimeUsed(LocalDate lastTimeUsed) {
+        this.lastTimeUsed = lastTimeUsed;
+    }
 }

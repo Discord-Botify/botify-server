@@ -107,6 +107,7 @@ public class DiscordRestController {
          *      appSessionId: 'id',
          *      discordName: 'name',
          *      discordDiscriminator: 'discriminator'
+         *
          *  }
          */
         get("/users/:sessionId", (request, response) -> {
@@ -120,7 +121,7 @@ public class DiscordRestController {
             AppUser user = appUserService.getAppUserWithDiscordId(discordId);
 
             UserInfoTransferObject userInfo = new UserInfoTransferObject();
-            userInfo.set
+            userInfo.setSpotifyUserName(user.getSpotifyUserName());
 
             response.status(200);
             return userInfo;

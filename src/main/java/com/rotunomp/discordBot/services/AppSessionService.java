@@ -6,6 +6,8 @@ import org.hibernate.SessionFactory;
 import com.rotunomp.discordBot.app.SessionFactoryInstance;
 import com.rotunomp.discordBot.models.AppSession;
 
+import java.time.LocalDate;
+
 public class AppSessionService {
 
     private SessionFactory sessionFactory;
@@ -30,6 +32,7 @@ public class AppSessionService {
 
         AppSession appSession = new AppSession();
         appSession.setDiscordId(discordId);
+        appSession.setLastTimeUsed(LocalDate.now());
         hibernateSession.persist(appSession);
         hibernateSession.getTransaction().commit();
 
@@ -38,7 +41,15 @@ public class AppSessionService {
 
     public String getDiscordIdFromSessionId(String sessionId) {
         Session hibernateSession = sessionFactory.openSession();
-        return hibernateSession.get(AppSession.class, sessionId).getDiscordId();
+        hibernateSession.beginTransaction();
+
+        // Get the AppSession and update the time last used
+        AppSession appSession = hibernateSession.get(AppSession.class, sessionId);
+        appSession.setLastTimeUsed(LocalDate.now());
+        hibernateSession.update(appSession);
+        hibernateSession.getTransaction().commit();
+
+        return appSession.getDiscordId();
     }
 
     public void deleteAppSession(String sessionId) {

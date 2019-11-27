@@ -1,5 +1,7 @@
 package com.rotunomp.discordBot.threads;
 
+import com.rotunomp.discordBot.app.DiscordPrivateMessenger;
+import com.rotunomp.discordBot.app.JDAInstance;
 import com.rotunomp.discordBot.app.SessionFactoryInstance;
 import com.rotunomp.discordBot.models.FollowedArtist;
 import com.rotunomp.discordBot.models.AppUser;
@@ -12,6 +14,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
+import javax.security.auth.login.LoginException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -20,13 +23,11 @@ public class AlbumNotificationThread extends Thread {
 
     private SpotifyService spotifyService;
     private SessionFactory sessionFactory;
-    private JDA jda;
     private int minutesPerUpdate;
 
-    public AlbumNotificationThread(JDA jda, int minutesPerUpdate) {
+    public AlbumNotificationThread(int minutesPerUpdate) {
         spotifyService = SpotifyService.getService();
         sessionFactory = SessionFactoryInstance.getInstance();
-        this.jda = jda;
         this.minutesPerUpdate = minutesPerUpdate;
     }
 
@@ -106,7 +107,7 @@ public class AlbumNotificationThread extends Thread {
 
     }
 
-    private void sendAlbumUpdateNotification(List<AlbumSimplified> albums, String userId, String artistName) {
+    private void sendAlbumUpdateNotification(List<AlbumSimplified> albums, String userId, String artistName) throws LoginException {
         // Figure out the most recent album
         AlbumSimplified mostRecentAlbum = albums.get(0);
         // Construct the message we want to send
@@ -120,16 +121,7 @@ public class AlbumNotificationThread extends Thread {
         .append(" | https://open.spotify.com/album/")
         .append(mostRecentAlbum.getId());
 
-        sendMessageToUser(str.toString(), userId);
+        DiscordPrivateMessenger.sendMessage(str.toString(), userId);
     }
 
-    private void sendMessageToUser(String message, String userId) {
-        // Get the User
-        User user = jda.getUserById(userId);
-        // Send the message
-        user.openPrivateChannel().queue((channel) ->
-        {
-            channel.sendMessage(message).queue();
-        });
-    }
 }
