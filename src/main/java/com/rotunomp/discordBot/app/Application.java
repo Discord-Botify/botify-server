@@ -15,10 +15,8 @@ import javax.security.auth.login.LoginException;
 public class Application {
 
     public static void main(String[] args) throws LoginException {
-        JDABuilder builder = new JDABuilder(AccountType.BOT);
-        builder.setToken(Properties.get("discord_token"));
-        builder.addEventListeners(new ServerListener(), new PrivateListener(), new ReactionListener());
-        JDA jda = builder.build();
+        // Build the Discord Bot
+        JDA jda = JDAInstance.getInstance();
 
         // This begins a thread that controls the user notification
         // The thread will repeat the notification process every x minutes

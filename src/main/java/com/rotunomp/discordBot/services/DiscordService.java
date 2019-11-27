@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.rotunomp.discordBot.app.DiscordPrivateMessenger;
 import com.rotunomp.discordBot.app.SessionFactoryInstance;
 import com.rotunomp.discordBot.models.AppUser;
 import com.rotunomp.discordBot.app.Properties;
@@ -23,6 +24,8 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+
+import javax.security.auth.login.LoginException;
 
 /**
  * DiscordService
@@ -54,7 +57,7 @@ public class DiscordService {
     // The main logic for signing in a user. In this method, we
     // send the authorization code to Discord to obtain an access token,
     // we get the user's information, and pass it back as a JSONObject
-    public JSONObject loginUser(String code) throws IOException {
+    public JSONObject loginUser(String code) throws IOException, LoginException {
         JSONObject returnJson = null;
 
         // Get the access token and refresh token
@@ -115,7 +118,7 @@ public class DiscordService {
         return new JSONObject(EntityUtils.toString(response.getEntity()));
     }
 
-    private AppUser getOrCreateUser(String discordId) {
+    private AppUser getOrCreateUser(String discordId) throws LoginException {
         // Start a hibernate session
         Session session = sessionFactory.openSession();
 
@@ -127,6 +130,7 @@ public class DiscordService {
             session.persist(user);
 
             // TODO: Message the user on Discord for the first time to start the message chain
+            DiscordPrivateMessenger.sendMessage("Welcome to Botify! Type !help to see Discord commands", discordId);
         }
 
         return user;

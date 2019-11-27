@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.rotunomp.discordBot.models.AppUser;
+import com.rotunomp.discordBot.services.AppUserService;
 import org.apache.http.NameValuePair;
 import org.json.JSONObject;
 
@@ -26,11 +28,12 @@ import java.awt.*;
 public class DiscordRestController {
     private DiscordService discordService;
     private AppSessionService appSessionService;
+    private AppUserService appUserService;
 
     public DiscordRestController() {
         discordService = DiscordService.getInstance();
         appSessionService = AppSessionService.getInstance();
-
+        appUserService = AppUserService.getInstance();
 
         /*  Part of the Discord oauth process, exchanges code for
          *  access tokens, start an AppSession, and return the
@@ -89,6 +92,38 @@ public class DiscordRestController {
             appSessionService.deleteAppSession(request.params(":sessionId"));
             response.status(204);
             return "";
+        }, json());
+
+
+        /*  Exchange an existing sessionId for that user's information
+         *
+         *  Params: sessionId
+         *
+         *  Request Body Layout: NONE
+         *
+         *  Response Body Layout:
+         *  status: 200
+         *  {
+         *      appSessionId: 'id',
+         *      discordName: 'name',
+         *      discordDiscriminator: 'discriminator'
+         *  }
+         */
+        get("/users/:sessionId", (request, response) -> {
+
+            // Get the corresponding AppUser object
+            // If the sessionId doesn't exist in the database, respond with a 401
+            // so that the calling app knows the session expired
+            String discordId = appSessionService.getDiscordIdFromSessionId(
+                    request.params(":sessionId")
+            );
+            AppUser user = appUserService.getAppUserWithDiscordId(discordId);
+
+            UserInfoTransferObject userInfo = new UserInfoTransferObject();
+            userInfo.set
+
+            response.status(200);
+            return userInfo;
         }, json());
 
     }
