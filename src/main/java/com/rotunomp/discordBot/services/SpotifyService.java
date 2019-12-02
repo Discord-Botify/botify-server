@@ -8,16 +8,19 @@ import com.rotunomp.discordBot.models.FollowedArtist;
 import com.rotunomp.discordBot.models.AppUser;
 import com.rotunomp.discordBot.threads.TokenRefreshThread;
 import com.wrapper.spotify.SpotifyApi;
+import com.wrapper.spotify.enums.ModelObjectType;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.credentials.ClientCredentials;
 import com.wrapper.spotify.model_objects.specification.Album;
 import com.wrapper.spotify.model_objects.specification.AlbumSimplified;
 import com.wrapper.spotify.model_objects.specification.Artist;
+import com.wrapper.spotify.model_objects.specification.PagingCursorbased;
 import com.wrapper.spotify.requests.authorization.client_credentials.ClientCredentialsRequest;
 import com.wrapper.spotify.requests.data.albums.GetAlbumRequest;
 import com.wrapper.spotify.requests.data.artists.GetArtistRequest;
 import com.wrapper.spotify.requests.data.artists.GetArtistsAlbumsRequest;
 import com.wrapper.spotify.requests.data.artists.GetSeveralArtistsRequest;
+import com.wrapper.spotify.requests.data.follow.GetUsersFollowedArtistsRequest;
 import com.wrapper.spotify.requests.data.search.simplified.SearchArtistsRequest;
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
@@ -442,5 +445,92 @@ public class SpotifyService {
         httpPost.setHeader("Authorization", accessToken);
         CloseableHttpResponse response = httpClient.execute(httpPost);
         return new JSONObject(EntityUtils.toString(response.getEntity()));
+    }
+
+    // This method grabs all of the followed artists from the Spotify API
+    // for a particular user
+    public List<FollowedArtist> followAllArtistsFollowedOnSpotify(AppUser appUser) throws IOException, SpotifyWebApiException {
+        // Start by getting a new access token for the AppUser
+        String accessToken = refreshSpotifyToken(appUser.getSpotifyRefreshToken());
+
+        // Use that access token to grab the user's followed artists on Spotify
+        List<Artist> spotifyFollowedArtists = getUsersSpotifyFollowedArtists(accessToken);
+
+        // Save all those artists in the database
+        followAllArtists(spotifyFollowedArtists, appUser.getDiscordId());
+
+        return null;
+    }
+
+    // Get a new Spotify access token from the Spotify API
+    private String refreshSpotifyToken(String refreshToken) throws IOException {
+        HttpPost httpPost = new HttpPost("https://accounts.spotify.com/api/token");
+
+        // Set the url parameters
+        httpPost.setEntity(getSpotifyRefreshExchangeParams(refreshToken));
+
+        // TODO: We might need to set the client ID and secret in an authorization header
+        // in base64 encoding. Currently we have it as a url param but not certain it works
+
+        // Get the access token
+        CloseableHttpResponse response = httpClient.execute(httpPost);
+        JSONObject responseBody = new JSONObject(EntityUtils.toString(response.getEntity()));
+        String accessToken = responseBody.getString("access_token");
+        return accessToken;
+    }
+
+    private HttpEntity getSpotifyRefreshExchangeParams(String refreshToken) {
+        List<NameValuePair> params = new ArrayList<>();
+        params.add(new BasicNameValuePair("client_id", Properties.get("spotify_client_id")));
+        params.add(new BasicNameValuePair("client_secret", Properties.get("spotify_client_secret")));
+        params.add(new BasicNameValuePair("grant_type", "refresh_token"));
+        params.add(new BasicNameValuePair("refresh_token", refreshToken));
+
+        return new UrlEncodedFormEntity(params, Consts.UTF_8);
+    }
+
+    // TODO: Implement method and use it in the regular followArtistById method
+    private void saveArtistFollowInDatabase(String artistId, String discordId) {
+
+    }
+
+    private List<Artist> getUsersSpotifyFollowedArtists(String accessToken) throws IOException, SpotifyWebApiException {
+        // It's just easier to use the API wrapper for this call
+        SpotifyApi temporaryApi = new SpotifyApi.Builder()
+                .setAccessToken(accessToken)
+                .build();
+
+        // Build our return list, 50 at a time
+        List<Artist> returnList = new ArrayList<>();
+        String lastArtistId = "";
+        boolean hasMoreArtists = true;
+
+        while(hasMoreArtists) {
+            GetUsersFollowedArtistsRequest getUsersFollowedArtistsRequest = spotifyApi
+                    .getUsersFollowedArtists(ModelObjectType.ARTIST)
+                    .after(lastArtistId)
+                    .limit(50)
+                    .build();
+
+            Artist[] artists = getUsersFollowedArtistsRequest.execute().getItems();
+            // If the return list is of size 50, we need to get the next batch
+            // Otherwise we can leave the loop
+            if(artists.length < 50) {
+                hasMoreArtists = false;
+            } else {
+                lastArtistId = artists[49].getId();
+            }
+            returnList.addAll(Arrays.asList(artists));
+
+        }
+
+        return returnList;
+
+    }
+
+    private void followAllArtists(List<Artist> artists, String discordId) {
+        for (Artist artist : artists) {
+            followArtistById(artist.getId(), discordId);
+        }
     }
 }

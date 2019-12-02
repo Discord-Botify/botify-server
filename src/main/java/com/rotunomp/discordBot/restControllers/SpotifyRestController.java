@@ -1,4 +1,5 @@
 package com.rotunomp.discordBot.restControllers;
+import com.rotunomp.discordBot.models.AppUser;
 import com.rotunomp.discordBot.models.FollowedArtist;
 import com.rotunomp.discordBot.services.AppSessionService;
 import com.rotunomp.discordBot.services.AppUserService;
@@ -221,6 +222,18 @@ public class SpotifyRestController {
                 },
                 json()
         );
+
+        post("artists/:sessionId", (request, response) -> {
+            String discordId = appSessionService.getDiscordIdFromSessionId(
+                    request.params(":sessionId")
+            );
+            AppUser appUser = appUserService.getAppUserWithDiscordId(discordId);
+
+            // TODO: Surround with try/catch and handle that
+            spotifyService.followAllArtistsFollowedOnSpotify(appUser);
+
+            return spotifyService.getFollowedArtistsForDiscordUser(discordId);
+        }, jsonWithExposeAnnotation());
 
     }
 

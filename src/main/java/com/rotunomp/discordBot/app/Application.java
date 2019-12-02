@@ -1,14 +1,9 @@
 package com.rotunomp.discordBot.app;
 
-import com.rotunomp.discordBot.listener.PrivateListener;
-import com.rotunomp.discordBot.listener.ReactionListener;
-import com.rotunomp.discordBot.listener.ServerListener;
 import com.rotunomp.discordBot.restControllers.RestController;
 import com.rotunomp.discordBot.threads.AlbumNotificationThread;
 import com.rotunomp.discordBot.threads.DatabaseCleanupThread;
-import net.dv8tion.jda.api.AccountType;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.JDABuilder;
 
 
 import javax.security.auth.login.LoginException;
