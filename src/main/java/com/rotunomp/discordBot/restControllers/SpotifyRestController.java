@@ -5,6 +5,7 @@ import com.rotunomp.discordBot.services.AppSessionService;
 import com.rotunomp.discordBot.services.AppUserService;
 import com.rotunomp.discordBot.services.SpotifyService;
 import com.wrapper.spotify.model_objects.specification.Artist;
+import com.wrapper.spotify.model_objects.specification.User;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -181,16 +182,15 @@ public class SpotifyRestController {
 
                     // Get the user's Spotify information
                     String accessToken = accessTokenJson.getString("access_token");
-                    JSONObject userInfoJson = spotifyService.getUsersSpotifyInfo(accessToken);
 
-		    System.out.println("User info grab: " + userInfoJson.toString());
+                    User user = spotifyService.getUsersSpotifyInfo2(accessToken);
 
                     // Add refresh token ans Spotify info to the corresponding user object
                     String discordId = appSessionService.getDiscordIdFromSessionId(
                             jsonBody.getString("sessionId")
                     );
-                    String spotifyId = userInfoJson.getString("id");
-                    String spotifyUserName = userInfoJson.getString("display_name");
+                    String spotifyId = user.getId();
+                    String spotifyUserName = user.getDisplayName();
                     String spotifyRefreshToken = accessTokenJson.getString("refresh_token");
 
                     appUserService.saveSpotifyInformation(

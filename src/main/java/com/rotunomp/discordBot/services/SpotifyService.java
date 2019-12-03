@@ -11,10 +11,7 @@ import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.enums.ModelObjectType;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.credentials.ClientCredentials;
-import com.wrapper.spotify.model_objects.specification.Album;
-import com.wrapper.spotify.model_objects.specification.AlbumSimplified;
-import com.wrapper.spotify.model_objects.specification.Artist;
-import com.wrapper.spotify.model_objects.specification.PagingCursorbased;
+import com.wrapper.spotify.model_objects.specification.*;
 import com.wrapper.spotify.requests.authorization.client_credentials.ClientCredentialsRequest;
 import com.wrapper.spotify.requests.data.albums.GetAlbumRequest;
 import com.wrapper.spotify.requests.data.artists.GetArtistRequest;
@@ -22,6 +19,7 @@ import com.wrapper.spotify.requests.data.artists.GetArtistsAlbumsRequest;
 import com.wrapper.spotify.requests.data.artists.GetSeveralArtistsRequest;
 import com.wrapper.spotify.requests.data.follow.GetUsersFollowedArtistsRequest;
 import com.wrapper.spotify.requests.data.search.simplified.SearchArtistsRequest;
+import com.wrapper.spotify.requests.data.users_profile.GetCurrentUsersProfileRequest;
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -445,6 +443,17 @@ public class SpotifyService {
         httpPost.setHeader("Authorization", "Bearer " + accessToken);
         CloseableHttpResponse response = httpClient.execute(httpPost);
         return new JSONObject(EntityUtils.toString(response.getEntity()));
+    }
+
+    // Use an access token to get user info with the Spotify Wrapper
+    public User getUsersSpotifyInfo2(String accessToken) throws IOException, SpotifyWebApiException {
+        SpotifyApi temporaryApi = new SpotifyApi.Builder()
+                .setAccessToken(accessToken)
+                .build();
+        GetCurrentUsersProfileRequest getCurrentUsersProfileRequest = temporaryApi.getCurrentUsersProfile()
+                .build();
+
+        return getCurrentUsersProfileRequest.execute();
     }
 
     // This method grabs all of the followed artists from the Spotify API
