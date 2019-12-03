@@ -183,6 +183,8 @@ public class SpotifyRestController {
                     String accessToken = accessTokenJson.getString("access_token");
                     JSONObject userInfoJson = spotifyService.getUsersSpotifyInfo(accessToken);
 
+		    System.out.println("User info grab: " + userInfoJson.toString());
+
                     // Add refresh token ans Spotify info to the corresponding user object
                     String discordId = appSessionService.getDiscordIdFromSessionId(
                             jsonBody.getString("sessionId")

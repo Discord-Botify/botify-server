@@ -434,7 +434,7 @@ public class SpotifyService {
         params.add(new BasicNameValuePair("client_secret", Properties.get("spotify_client_secret")));
         params.add(new BasicNameValuePair("grant_type", "authorization_code"));
         params.add(new BasicNameValuePair("code", code));
-        params.add(new BasicNameValuePair("redirect_uri", "https://botify.michaelrotuno.dev/oauth"));
+        params.add(new BasicNameValuePair("redirect_uri", "https://botify.michaelrotuno.dev/spotify-oauth"));
 
         return new UrlEncodedFormEntity(params, Consts.UTF_8);
     }
@@ -442,7 +442,7 @@ public class SpotifyService {
     // Use an access token to get a user's Spotify information
     public JSONObject getUsersSpotifyInfo(String accessToken) throws IOException {
         HttpPost httpPost = new HttpPost("https://api.spotify.com/v1/me");
-        httpPost.setHeader("Authorization", accessToken);
+        httpPost.setHeader("Authorization", "Bearer " + accessToken);
         CloseableHttpResponse response = httpClient.execute(httpPost);
         return new JSONObject(EntityUtils.toString(response.getEntity()));
     }
