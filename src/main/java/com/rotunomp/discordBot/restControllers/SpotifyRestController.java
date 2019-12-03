@@ -177,6 +177,8 @@ public class SpotifyRestController {
                     String code = jsonBody.getString("code");
                     JSONObject accessTokenJson = spotifyService.exchangeCodeForTokens(code);
 
+                    System.out.println("Spotify access token response: " + accessTokenJson.toString());
+
                     // Get the user's Spotify information
                     String accessToken = accessTokenJson.getString("access_token");
                     JSONObject userInfoJson = spotifyService.getUsersSpotifyInfo(accessToken);
@@ -223,6 +225,26 @@ public class SpotifyRestController {
                 json()
         );
 
+        /*   Follow a user's followed artists on Spotify (assuming they already
+         *   singed into Spotify on our app). Returns all their followed artists
+         *
+         *   Params: sessionId
+         *
+         *   Request Body Layout: NONE
+         *
+         *   Response Body Layout:
+         *   status: 200
+         *   {
+         *      [
+         *          ...
+         *          {
+         *              id: 'artistId',
+         *              name: 'artistName'
+         *          },
+         *          ...
+         *      ]
+         *   }
+         */
         post("artists/:sessionId", (request, response) -> {
             String discordId = appSessionService.getDiscordIdFromSessionId(
                     request.params(":sessionId")
