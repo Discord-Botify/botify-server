@@ -160,9 +160,7 @@ public class SpotifyService {
                             .build();
                 offset+=50;
                 nextFiftyAlbums = Arrays.asList(request.execute().getItems());
-                for (AlbumSimplified album : nextFiftyAlbums) {
-                    albums.add(album);
-                }
+                albums.addAll(nextFiftyAlbums);
             }
             return albums;
         } catch (IOException | SpotifyWebApiException e) {
