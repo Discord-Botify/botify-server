@@ -1,26 +1,13 @@
 package com.rotunomp.discordBot.restControllers;
 
-import static com.rotunomp.discordBot.app.JsonUtil.*;
-import static spark.Spark.*;
-import com.rotunomp.discordBot.app.Properties;
-
-import java.io.OutputStreamWriter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.rotunomp.discordBot.models.AppUser;
+import com.rotunomp.discordBot.services.AppSessionService;
 import com.rotunomp.discordBot.services.AppUserService;
-import org.apache.http.NameValuePair;
+import com.rotunomp.discordBot.services.DiscordService;
 import org.json.JSONObject;
 
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonWriter;
-import com.rotunomp.discordBot.services.AppSessionService;
-import com.rotunomp.discordBot.services.DiscordService;
-
-import static com.rotunomp.discordBot.app.JsonUtil.*;
-import java.awt.*;
+import static com.rotunomp.discordBot.app.JsonUtil.json;
+import static spark.Spark.*;
 
 /**
  * DiscordRestController

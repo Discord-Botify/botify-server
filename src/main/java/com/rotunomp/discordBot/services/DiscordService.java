@@ -58,8 +58,6 @@ public class DiscordService {
     // send the authorization code to Discord to obtain an access token,
     // we get the user's information, and pass it back as a JSONObject
     public JSONObject loginUser(String code) throws IOException, LoginException {
-        JSONObject returnJson = null;
-
         // Get the access token and refresh token
         JSONObject tokenResponseJson = exchangeCodeForTokens(code);
 
@@ -121,6 +119,7 @@ public class DiscordService {
     private AppUser getOrCreateUser(String discordId) throws LoginException {
         // Start a hibernate session
         Session session = sessionFactory.openSession();
+        session.beginTransaction();
 
         // See if a user exists, and if not add it
         AppUser user = session.get(AppUser.class, discordId);
@@ -132,6 +131,7 @@ public class DiscordService {
             // TODO: Message the user on Discord for the first time to start the message chain
             DiscordPrivateMessenger.sendMessage("Welcome to Botify! Type !help to see Discord commands", discordId);
         }
+        session.getTransaction().commit();
 
         return user;
     }
