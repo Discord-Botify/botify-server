@@ -515,7 +515,7 @@ public class SpotifyService {
         boolean hasMoreArtists = true;
 
         while(hasMoreArtists) {
-            GetUsersFollowedArtistsRequest getUsersFollowedArtistsRequest = spotifyApi
+            GetUsersFollowedArtistsRequest getUsersFollowedArtistsRequest = temporaryApi
                     .getUsersFollowedArtists(ModelObjectType.ARTIST)
                     .after(lastArtistId)
                     .limit(50)

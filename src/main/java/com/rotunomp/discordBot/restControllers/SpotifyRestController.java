@@ -235,7 +235,7 @@ public class SpotifyRestController {
          *   Request Body Layout: NONE
          *
          *   Response Body Layout:
-         *   status: 200
+         *   status: 201
          *   {
          *      [
          *          ...
@@ -256,6 +256,7 @@ public class SpotifyRestController {
             // TODO: Surround with try/catch and handle that
             spotifyService.followAllArtistsFollowedOnSpotify(appUser);
 
+            response.status(201);
             return spotifyService.getFollowedArtistsForDiscordUser(discordId);
         }, jsonWithExposeAnnotation());
 
