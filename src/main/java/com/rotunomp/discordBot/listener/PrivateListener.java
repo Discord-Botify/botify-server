@@ -97,11 +97,11 @@ public class PrivateListener extends AbstractListener {
                             doUnfollow(event);
                             break;
                         case "follow-list":
-                            channel.sendMessage(
+                            this.sendLongMessage(channel,
                                     spotifyService.getFollowedArtistStringForUser(
                                             event.getAuthor().getId()
                                     )
-                            ).queue();
+                            );
                             break;
                         default:
                             channel.sendMessage("Usage: !spotify album/artist <id/name>").queue();
