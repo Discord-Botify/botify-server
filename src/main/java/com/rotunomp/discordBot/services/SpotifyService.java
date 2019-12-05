@@ -38,6 +38,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 public class SpotifyService {
@@ -515,11 +516,19 @@ public class SpotifyService {
         boolean hasMoreArtists = true;
 
         while(hasMoreArtists) {
-            GetUsersFollowedArtistsRequest getUsersFollowedArtistsRequest = temporaryApi
-                    .getUsersFollowedArtists(ModelObjectType.ARTIST)
-                    .after(lastArtistId)
-                    .limit(50)
-                    .build();
+            GetUsersFollowedArtistsRequest getUsersFollowedArtistsRequest = null;
+            if(lastArtistId.equals("")) {
+                getUsersFollowedArtistsRequest = temporaryApi
+                        .getUsersFollowedArtists(ModelObjectType.ARTIST)
+                        .limit(50)
+                        .build();
+            } else {
+                getUsersFollowedArtistsRequest = temporaryApi
+                        .getUsersFollowedArtists(ModelObjectType.ARTIST)
+                        .after(lastArtistId)
+                        .limit(50)
+                        .build();
+            }
 
             Artist[] artists = getUsersFollowedArtistsRequest.execute().getItems();
             // If the return list is of size 50, we need to get the next batch
