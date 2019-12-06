@@ -145,20 +145,20 @@ public class SpotifyService {
                     spotifyApi.getArtistsAlbums(artistId)
                             .market(CountryCode.US)
                             .limit(50)
-                            .album_type("album")
+                            .album_type("album,single")
                             .build();
             List<AlbumSimplified> albums = Arrays.asList(request.execute().getItems());
             List<AlbumSimplified> nextFiftyAlbums = Arrays.asList(request.execute().getItems());
             int offset = 50;
             while (nextFiftyAlbums.size() == 50) {
                 request =
-                    spotifyApi.getArtistsAlbums(artistId)
-                            .market(CountryCode.US)
-                            .limit(50)
-                            .offset(offset)
-                            .album_type("album")
-                            .build();
-                offset+=50;
+                        spotifyApi.getArtistsAlbums(artistId)
+                                .market(CountryCode.US)
+                                .limit(50)
+                                .offset(offset)
+                                .album_type("album")
+                                .build();
+                offset += 50;
                 nextFiftyAlbums = Arrays.asList(request.execute().getItems());
                 albums.addAll(nextFiftyAlbums);
             }
@@ -218,7 +218,7 @@ public class SpotifyService {
 
         } catch (Exception e) {
             e.printStackTrace();
-            if(tx != null) {
+            if (tx != null) {
                 session.getTransaction().rollback();
             }
         } finally {
@@ -268,7 +268,7 @@ public class SpotifyService {
 
         } catch (Exception e) {
             e.printStackTrace();
-            if(tx != null) {
+            if (tx != null) {
                 session.getTransaction().rollback();
             }
         } finally {
@@ -288,25 +288,20 @@ public class SpotifyService {
         // List of artist ids to make batch requests of 50 maximum
         int remainingArtists = artistIds.size();
         List<Artist> returnList = new ArrayList<>();
-System.out.println("artistIds size before loop execution: " + remainingArtists);
         while (remainingArtists > 0) {
             GetSeveralArtistsRequest artistsRequest = null;
-            if(remainingArtists > 50) {
-
-String[] currentRequestIds = artistIds.subList(0, 50)
-                                        .toArray(new String[50]);
-
-System.out.println("Current request size in main loop: " + currentRequestIds.length);
+            if (remainingArtists > 50) {
+                String[] currentRequestIds = artistIds.subList(0, 50)
+                        .toArray(new String[50]);
 
                 artistsRequest =
                         spotifyApi.getSeveralArtists(currentRequestIds).build();
                 artistIds = artistIds.subList(50, artistIds.size());
-System.out.println("remaining artists greater than 50. list size: " + artistIds.size());
-	    } else {
-String[] currentRequestIds = artistIds.toArray(new String[artistIds.size()]);
+            } else {
+                String[] currentRequestIds = artistIds.toArray(new String[artistIds.size()]);
                 artistsRequest =
                         spotifyApi.getSeveralArtists(currentRequestIds).build();
-
+            }
             try {
                 returnList.addAll(Arrays.asList(artistsRequest.execute()));
             } catch (IOException | SpotifyWebApiException e) {
@@ -314,26 +309,26 @@ String[] currentRequestIds = artistIds.toArray(new String[artistIds.size()]);
             }
 
             remainingArtists -= 50;
-        }
 
+        }
         return returnList;
     }
 
     public String getFollowedArtistStringForUser(String userId) {
-        Set<FollowedArtist> followedArtists= getFollowedArtistsForDiscordUser(userId);
+        Set<FollowedArtist> followedArtists = getFollowedArtistsForDiscordUser(userId);
         StringBuilder artists = new StringBuilder();
         for (FollowedArtist followedArtist : followedArtists) {
             artists.append(followedArtist.getName())
-            .append(" | ID: ")
-            .append(followedArtist.getId())
-            .append("\n");
+                    .append(" | ID: ")
+                    .append(followedArtist.getId())
+                    .append("\n");
         }
 
         return artists.toString();
     }
 
     public List<FollowedArtist> getFollowedArtistsListForDiscordId(String userId) {
-        Set<FollowedArtist> followedArtists= getFollowedArtistsForDiscordUser(userId);
+        Set<FollowedArtist> followedArtists = getFollowedArtistsForDiscordUser(userId);
         List<FollowedArtist> followedArtistList = new ArrayList<FollowedArtist>();
 
         for (FollowedArtist artist : followedArtists) {
@@ -345,24 +340,10 @@ String[] currentRequestIds = artistIds.toArray(new String[artistIds.size()]);
         return followedArtistList;
     }
 
-    // TODO: This method is useless so delete it?
-    public List<FollowedArtist> getFollowedArtistsListForSpotifyId(String userId) {
-        // Get the corresponding user in the database
-        Session session = sessionFactory.openSession();
-        Transaction tx = session.beginTransaction();
-        Query query = session.createQuery("from SpotifyUser where spotifyId = :spotifyId");
-        query.setParameter("spotifyId", userId);
-        AppUser user = (AppUser) query.list().get(0);
-        tx.commit();
-
-        // Call the method to get the list of artists based on Discord ID
-        return getFollowedArtistsListForDiscordId(user.getDiscordId());
-    }
-
     // Useful for the Discord unfollow interface, where artists need to
     // be displayed in sets of ten
     public List<List<FollowedArtist>> getFollowedArtistInTens(String userId) {
-        List<FollowedArtist> bigArtistList= getFollowedArtistsListForDiscordId(userId);
+        List<FollowedArtist> bigArtistList = getFollowedArtistsListForDiscordId(userId);
         List<List<FollowedArtist>> returnList = new ArrayList<>();
 
         // Get the size of the big list
@@ -371,7 +352,7 @@ String[] currentRequestIds = artistIds.toArray(new String[artistIds.size()]);
 
         for (int i = 0; i < bigArtistList.size(); i += pageSize) {
             if (i + pageSize < bigArtistList.size())
-                returnList.add(bigArtistList.subList(i,i + pageSize));
+                returnList.add(bigArtistList.subList(i, i + pageSize));
             else
                 returnList.add(bigArtistList.subList(i, bigArtistList.size()));
         }
@@ -519,9 +500,9 @@ String[] currentRequestIds = artistIds.toArray(new String[artistIds.size()]);
         String lastArtistId = "";
         boolean hasMoreArtists = true;
 
-        while(hasMoreArtists) {
+        while (hasMoreArtists) {
             GetUsersFollowedArtistsRequest getUsersFollowedArtistsRequest = null;
-            if(lastArtistId.equals("")) {
+            if (lastArtistId.equals("")) {
                 getUsersFollowedArtistsRequest = temporaryApi
                         .getUsersFollowedArtists(ModelObjectType.ARTIST)
                         .limit(50)
@@ -537,7 +518,7 @@ String[] currentRequestIds = artistIds.toArray(new String[artistIds.size()]);
             Artist[] artists = getUsersFollowedArtistsRequest.execute().getItems();
             // If the return list is of size 50, we need to get the next batch
             // Otherwise we can leave the loop
-            if(artists.length < 50) {
+            if (artists.length < 50) {
                 hasMoreArtists = false;
             } else {
                 lastArtistId = artists[49].getId();

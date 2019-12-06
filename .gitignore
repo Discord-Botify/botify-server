@@ -1,5 +1,6 @@
 .idea/**
 config.properties
+c3p0.properties
 src/main/resources/hibernate.properties
 
 target/**
