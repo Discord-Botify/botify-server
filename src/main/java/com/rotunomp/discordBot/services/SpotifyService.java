@@ -156,7 +156,7 @@ public class SpotifyService {
                                 .market(CountryCode.US)
                                 .limit(50)
                                 .offset(offset)
-                                .album_type("album")
+                                .album_type("album,single")
                                 .build();
                 offset += 50;
                 nextFiftyAlbums = Arrays.asList(request.execute().getItems());
