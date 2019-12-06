@@ -288,18 +288,24 @@ public class SpotifyService {
         // List of artist ids to make batch requests of 50 maximum
         int remainingArtists = artistIds.size();
         List<Artist> returnList = new ArrayList<>();
+System.out.println("artistIds size before loop execution: " + remainingArtists);
         while (remainingArtists > 0) {
             GetSeveralArtistsRequest artistsRequest = null;
             if(remainingArtists > 50) {
+
+String[] currentRequestIds = artistIds.subList(0, 50)
+                                        .toArray(new String[50]);
+
+System.out.println("Current request size in main loop: " + currentRequestIds.length);
+
                 artistsRequest =
-                        spotifyApi.getSeveralArtists(
-                                artistIds.subList(0, 50)
-                                        .toArray(new String[artistIds.size()])).build();
+                        spotifyApi.getSeveralArtists(currentRequestIds).build();
                 artistIds = artistIds.subList(50, artistIds.size());
-            } else {
+System.out.println("remaining artists greater than 50. list size: " + artistIds.size());
+	    } else {
+String[] currentRequestIds = artistIds.toArray(new String[artistIds.size()]);
                 artistsRequest =
-                        spotifyApi.getSeveralArtists(artistIds.toArray(new String[artistIds.size()])).build();
-            }
+                        spotifyApi.getSeveralArtists(currentRequestIds).build();
 
             try {
                 returnList.addAll(Arrays.asList(artistsRequest.execute()));
