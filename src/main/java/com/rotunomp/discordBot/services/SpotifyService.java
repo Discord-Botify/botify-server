@@ -147,8 +147,10 @@ public class SpotifyService {
                             .limit(50)
                             .album_type("album,single")
                             .build();
-            List<AlbumSimplified> albums = Arrays.asList(request.execute().getItems());
-            List<AlbumSimplified> nextFiftyAlbums = Arrays.asList(request.execute().getItems());
+            AlbumSimplified[] requestResponse = request.execute().getItems();
+            List<AlbumSimplified> albums = new ArrayList<>();
+            Collections.addAll(albums, requestResponse);
+            List<AlbumSimplified> nextFiftyAlbums = Arrays.asList(requestResponse);
             int offset = 50;
             while (nextFiftyAlbums.size() == 50) {
                 request =
