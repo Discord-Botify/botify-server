@@ -51,26 +51,6 @@ public class ServerListener extends AbstractListener {
                     pingService = new PingService(this.channel, 5000);
                     pingService.start();
                     break;
-                case REMOVE_ROLE:
-                    member = message.getMentionedMembers().get(0);
-                    role = message.getMentionedRoles().get(0);
-                    guild = event.getGuild();
-                    guild.removeRoleFromMember(member, role).queue();
-                    this.channel.sendMessage(member.getUser().getAsMention() + " was removed from role " + role.getAsMention()).queue();
-                    break;
-                case ADD_ROLE:
-                    member = message.getMentionedMembers().get(0);
-                    role = message.getMentionedRoles().get(0);
-                    guild = event.getGuild();
-                    guild.addRoleToMember(member, role).queue();
-                    this.channel.sendMessage(member.getUser().getAsMention() + " was added to role " + role.getAsMention()).queue();
-                    break;
-                case POKEMON:
-                    String pokemonName = splitCommand[1];
-                    PokemonApiWrapper pokemonApiWrapper = new PokemonApiWrapper();
-                    this.channel.sendMessage(pokemonApiWrapper.getPokemonTypes(pokemonName)).queue();
-                    this.channel.sendMessage(pokemonApiWrapper.getFlavorText(pokemonName)).queue();
-                    break;
                 case HELP:
                     // See if the command has a second parameter and call the help function
                     // accordingly

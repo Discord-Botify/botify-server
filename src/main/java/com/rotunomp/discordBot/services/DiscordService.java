@@ -94,19 +94,18 @@ public class DiscordService {
     }
 
     // Exchange code for access token and refresh token with the Discord API
-    private JSONObject exchangeCodeForTokens(String code) throws ClientProtocolException, IOException {
+    private JSONObject exchangeCodeForTokens(String code) throws IOException {
         System.out.println("Exchanging code: " + code);
         HttpPost httpPost = new HttpPost(API_TOKEN);
         httpPost.setHeader("Content-type", "application/x-www-form-urlencoded");
         httpPost.setEntity(getDiscordTokenExchangeParams(code));
         CloseableHttpResponse response = httpClient.execute(httpPost);
-        JSONObject tokenResponseJson = new JSONObject (EntityUtils.toString(response.getEntity()));
 
-        return tokenResponseJson;
+        return new JSONObject (EntityUtils.toString(response.getEntity()));
     }
     
     // Get a Discord user's info from the API with their access token
-    private JSONObject getDiscordUserInfo(String accessToken) throws ClientProtocolException, IOException {
+    private JSONObject getDiscordUserInfo(String accessToken) throws IOException {
         JSONObject returnBody = null;
 
         HttpGet httpGet = new HttpGet(API_USER);
@@ -128,7 +127,6 @@ public class DiscordService {
             user.setDiscordId(discordId);
             session.persist(user);
 
-            // TODO: Message the user on Discord for the first time to start the message chain
             DiscordPrivateMessenger.sendMessage("Welcome to Botify! Type !help to see Discord commands", discordId);
         }
         session.getTransaction().commit();

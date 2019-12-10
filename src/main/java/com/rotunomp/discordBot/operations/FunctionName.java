@@ -9,24 +9,6 @@ public enum FunctionName {
                     "bot's multithreading capabilities, because you can interact with the bot " +
                     "while it is waiting to send its next message"
     ),
-    ADD_ROLE (
-            FunctionType.SERVER,
-            "!add-role",
-            "!add-role <user> <role> .... Give a member a role by mentioning the user and role",
-            "TODO"
-    ),
-    REMOVE_ROLE (
-            FunctionType.SERVER,
-            "!remove-role",
-            "!remove-role <user> <role> .... Remove a role by @mentioning the user and role",
-            "TODO"
-    ),
-    POKEMON (
-            FunctionType.ALL,
-            "!pokemon",
-            "!pokemon <pokemon name> .... Get info about a Pokemon",
-            "TODO"
-    ),
     SPOTIFY (
             FunctionType.PRIVATE,
             "!spotify",

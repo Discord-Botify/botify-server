@@ -30,6 +30,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.hibernate.JDBCException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -223,6 +224,7 @@ public class SpotifyService {
             if (tx != null) {
                 session.getTransaction().rollback();
             }
+            followArtist(artistName, userId);
         } finally {
             session.close();
         }
@@ -268,11 +270,25 @@ public class SpotifyService {
 
             return "Success adding " + artistName;
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (JDBCException e) {
             if (tx != null) {
                 session.getTransaction().rollback();
             }
+            // If the database timed out, call the method again
+            int errorCode = e.getSQLException().getErrorCode();
+            if (errorCode == 2013) {
+                System.out.println("Lost connection to mySQL server, re-establishing connection...");
+                // Restart the method
+                System.out.println("Restart method here");
+            } else {
+                System.out.println("The error code was " + errorCode);
+                e.printStackTrace();
+            }
+        } catch (Exception e) {
+            if (tx != null) {
+                session.getTransaction().rollback();
+            }
+            e.printStackTrace();
         } finally {
             session.close();
         }
@@ -365,43 +381,101 @@ public class SpotifyService {
 
     public Set<FollowedArtist> getFollowedArtistsForDiscordUser(String userId) {
         Session session = sessionFactory.openSession();
-        Set<FollowedArtist> followedArtists = session.get(AppUser.class, userId).getFollowedArtists();
-        session.close();
+        Set<FollowedArtist> followedArtists = null;
+
+        try {
+            followedArtists = session.get(AppUser.class, userId).getFollowedArtists();
+        } catch (JDBCException e) {
+            // If the database timed out, call the method again
+            int errorCode = e.getSQLException().getErrorCode();
+            if (errorCode == 2013) {
+                System.out.println("Lost connection to mySQL server, re-establishing connection...");
+                // TODO: Restart the method
+            } else {
+                System.out.println("The error code was " + errorCode);
+                e.printStackTrace();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
+
         return followedArtists;
     }
 
     public String unfollowArtist(String artistId, String userId) {
         Session session = sessionFactory.openSession();
         Transaction tx = session.beginTransaction();
+        String artistName = null;
 
-        // First get the user from the database
-        AppUser user = session.get(AppUser.class, userId);
+        try {
+            // First get the user from the database
+            AppUser user = session.get(AppUser.class, userId);
 
-        // Then get the artist from the database
-        FollowedArtist artist = session.get(FollowedArtist.class, artistId);
-        String artistName = artist.getName();
+            // Then get the artist from the database
+            FollowedArtist artist = session.get(FollowedArtist.class, artistId);
+            artistName = artist.getName();
 
-        // Delete the artist from the user's following set
-        user.getFollowedArtists().remove(artist);
-        // Delete the user from the artist's followed set
-        artist.getFollowers().remove(user);
+            // Delete the artist from the user's following set
+            user.getFollowedArtists().remove(artist);
+            // Delete the user from the artist's followed set
+            artist.getFollowers().remove(user);
 
-        session.persist(artist);
-        session.persist(user);
+            session.persist(artist);
+            session.persist(user);
 
-        if (artist.getFollowers().size() == 0) {
-            session.delete(artist);
+            if (artist.getFollowers().size() == 0) {
+                session.delete(artist);
+            }
+
+            tx.commit();
+        } catch (JDBCException e) {
+            if (tx != null) {
+                session.getTransaction().rollback();
+            }
+            // If the database timed out, call the method again
+            int errorCode = e.getSQLException().getErrorCode();
+            if (errorCode == 2013) {
+                System.out.println("Lost connection to mySQL server, re-establishing connection...");
+                // TODO: Restart the method
+            } else {
+                System.out.println("The error code was " + errorCode);
+                e.printStackTrace();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tx != null) {
+                session.getTransaction().rollback();
+            }
+        } finally {
+            session.close();
         }
-
-        tx.commit();
-        session.close();
 
         return "Successfully unfollowed " + artistName;
     }
 
     public List<FollowedArtist> getAllDatabaseArtists() {
         Session session = sessionFactory.openSession();
-        return session.createQuery("FROM FollowedArtist").list();
+        try {
+            return session.createQuery("FROM FollowedArtist").list();
+        } catch (JDBCException e) {
+            // If the database timed out, call the method again
+            int errorCode = e.getSQLException().getErrorCode();
+            if (errorCode == 2013) {
+                System.out.println("Lost connection to mySQL server, re-establishing connection...");
+                // TODO: Restart the method
+            } else {
+                System.out.println("The error code was " + errorCode);
+                e.printStackTrace();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
+
+        return null;
     }
 
     // Exchange for oauth tokens with Spotify
