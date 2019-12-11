@@ -35,7 +35,8 @@ public class RestController {
         before((request, response) -> response.header("Access-Control-Allow-Origin", "*"));
 
         new SpotifyRestController();
-        new DiscordRestController();
+        new OauthRestController();
+        new AppRestController();
     }
 
 
