@@ -1,7 +1,5 @@
 package com.rotunomp.discordBot.restControllers;
 import com.rotunomp.discordBot.models.FollowedArtist;
-import com.rotunomp.discordBot.services.AppSessionService;
-import com.rotunomp.discordBot.services.AppUserService;
 import com.rotunomp.discordBot.services.SpotifyService;
 import com.wrapper.spotify.model_objects.specification.Artist;
 

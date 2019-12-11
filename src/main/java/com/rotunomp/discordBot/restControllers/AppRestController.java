@@ -87,7 +87,7 @@ public class AppRestController {
             spotifyService.followAllArtistsFollowedOnSpotify(appUser);
 
             response.status(201);
-            return spotifyService.getFollowedArtistsForDiscordUser(discordId);
+            return spotifyService.getFollowedArtistsListForDiscordId(discordId);
         }, jsonWithExposeAnnotation());
 
 
