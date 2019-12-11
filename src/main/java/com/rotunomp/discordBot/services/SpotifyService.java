@@ -10,6 +10,7 @@ import com.rotunomp.discordBot.threads.TokenRefreshThread;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.enums.ModelObjectType;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
+import com.wrapper.spotify.exceptions.detailed.TooManyRequestsException;
 import com.wrapper.spotify.model_objects.credentials.ClientCredentials;
 import com.wrapper.spotify.model_objects.specification.*;
 import com.wrapper.spotify.requests.authorization.client_credentials.ClientCredentialsRequest;
@@ -233,7 +234,7 @@ public class SpotifyService {
         return "Failure adding" + artistName;
     }
 
-    public String followArtistById(String artistId, String userId) {
+    public String followArtistById(String artistId, String userId) throws InterruptedException {
         Session session = sessionFactory.openSession();
         Transaction tx = null;
 
@@ -285,7 +286,13 @@ public class SpotifyService {
                 System.out.println("The error code was " + errorCode);
                 e.printStackTrace();
             }
-        } catch (Exception e) {
+        } catch(TooManyRequestsException e) {
+            System.out.println("Waiting for the rate limit to chill");
+            int retryAfter = e.getRetryAfter();
+            System.out.println("retrying after " + retryAfter + " seconds");
+            Thread.sleep(retryAfter * 1000);
+            followArtistById(artistId, userId);
+        } catch(Exception e) {
             if (tx != null) {
                 session.getTransaction().rollback();
             }
@@ -606,7 +613,11 @@ public class SpotifyService {
 
     private void followAllArtists(List<Artist> artists, String discordId) {
         for (Artist artist : artists) {
-            followArtistById(artist.getId(), discordId);
+            try {
+                followArtistById(artist.getId(), discordId);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
