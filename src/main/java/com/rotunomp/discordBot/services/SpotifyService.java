@@ -34,6 +34,7 @@ import org.hibernate.JDBCException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.exception.JDBCConnectionException;
 import org.hibernate.query.Query;
 import org.json.JSONObject;
 
@@ -270,7 +271,7 @@ public class SpotifyService {
 
             return "Success adding " + artistName;
 
-        } catch (JDBCException e) {
+        } catch (JDBCConnectionException e) {
             if (tx != null) {
                 session.getTransaction().rollback();
             }
@@ -385,7 +386,7 @@ public class SpotifyService {
 
         try {
             followedArtists = session.get(AppUser.class, userId).getFollowedArtists();
-        } catch (JDBCException e) {
+        } catch (JDBCConnectionException e) {
             // If the database timed out, call the method again
             int errorCode = e.getSQLException().getErrorCode();
             if (errorCode == 2013) {
@@ -459,7 +460,7 @@ public class SpotifyService {
         Session session = sessionFactory.openSession();
         try {
             return session.createQuery("FROM FollowedArtist").list();
-        } catch (JDBCException e) {
+        } catch (JDBCConnectionException e) {
             // If the database timed out, call the method again
             int errorCode = e.getSQLException().getErrorCode();
             if (errorCode == 2013) {
