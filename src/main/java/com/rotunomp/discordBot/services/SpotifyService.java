@@ -279,7 +279,7 @@ public class SpotifyService {
             if (errorCode == 2013) {
                 System.out.println("Lost connection to mySQL server, re-establishing connection...");
                 // Restart the method
-                System.out.println("Restart method here");
+                return followArtistById(artistId, userId);
             } else {
                 System.out.println("The error code was " + errorCode);
                 e.printStackTrace();
@@ -390,7 +390,7 @@ public class SpotifyService {
             int errorCode = e.getSQLException().getErrorCode();
             if (errorCode == 2013) {
                 System.out.println("Lost connection to mySQL server, re-establishing connection...");
-                // TODO: Restart the method
+                return getFollowedArtistsForDiscordUser(userId);
             } else {
                 System.out.println("The error code was " + errorCode);
                 e.printStackTrace();
@@ -464,7 +464,7 @@ public class SpotifyService {
             int errorCode = e.getSQLException().getErrorCode();
             if (errorCode == 2013) {
                 System.out.println("Lost connection to mySQL server, re-establishing connection...");
-                // TODO: Restart the method
+                return getAllDatabaseArtists();
             } else {
                 System.out.println("The error code was " + errorCode);
                 e.printStackTrace();
@@ -560,10 +560,6 @@ public class SpotifyService {
         return new UrlEncodedFormEntity(params, Consts.UTF_8);
     }
 
-    // TODO: Implement method and use it in the regular followArtistById method
-    private void saveArtistFollowInDatabase(String artistId, String discordId) {
-
-    }
 
     private List<Artist> getUsersSpotifyFollowedArtists(String accessToken) throws IOException, SpotifyWebApiException {
         // It's just easier to use the API wrapper for this call
