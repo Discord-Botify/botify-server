@@ -245,12 +245,20 @@ public class SpotifyService {
                     .appendPattern("[yyyy-MM]")
                     .appendPattern("[yyyy]");
             DateTimeFormatter formatter = builder.toFormatter(Locale.ENGLISH);
-            LocalDate a1Release = LocalDate.parse(a1.getReleaseDate(), formatter);
-            LocalDate a2Release = LocalDate.parse(a2.getReleaseDate(), formatter);
+            LocalDate a1Release = null;
+            LocalDate a2Release = null;
+            try {
+                a1Release = LocalDate.parse(a1.getReleaseDate(), formatter);
+                a2Release = LocalDate.parse(a2.getReleaseDate(), formatter);
+                if (a1Release.equals(a2Release))
+                    return 0;
+                return a1Release.isBefore(a2Release) ? -1 : 1;
 
-            if (a1Release.equals(a2Release))
-                return 0;
-            return a1Release.isBefore(a2Release) ? -1 : 1;
+            } catch (Exception e) {
+                System.err.println("Could not parse " + a1.getReleaseDate());
+            }
+
+            return 0;
         });
 
 
