@@ -15,6 +15,7 @@ import com.wrapper.spotify.model_objects.credentials.ClientCredentials;
 import com.wrapper.spotify.model_objects.specification.*;
 import com.wrapper.spotify.requests.authorization.client_credentials.ClientCredentialsRequest;
 import com.wrapper.spotify.requests.data.albums.GetAlbumRequest;
+import com.wrapper.spotify.requests.data.albums.GetSeveralAlbumsRequest;
 import com.wrapper.spotify.requests.data.artists.GetArtistRequest;
 import com.wrapper.spotify.requests.data.artists.GetArtistsAlbumsRequest;
 import com.wrapper.spotify.requests.data.artists.GetSeveralArtistsRequest;
@@ -40,6 +41,7 @@ import org.hibernate.query.Query;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
@@ -173,6 +175,75 @@ public class SpotifyService {
         }
 
         return null;
+    }
+
+    // Similar to getArtistsAlbums, this method returns a list of the more complete
+    // Album object as opposed to the AlbumSimplified Object. This List is also sorted
+    // by release date for album notification purposes
+    public synchronized List<Album> getOrderedArtistReleases(String artistId) {
+        List<Album> returnList = new ArrayList<>();
+
+        // First we'll get the incomplete list of AlbumSimplified objects
+        List<AlbumSimplified> simpleAlbums = getArtistsAlbums(artistId);
+
+        // Set up our while loop variables
+        int albumsRetrieved = 0;
+        int albumsRemaining = simpleAlbums.size();
+        List<String> albumIdsList = new ArrayList<>();
+        for (AlbumSimplified albumSimplified : simpleAlbums) {
+            albumIdsList.add(albumSimplified.getId());
+        }
+        String[] albumIds = (String[]) albumIdsList.toArray();
+
+        // Loop that list
+        while(albumsRemaining > 0) {
+            int toGrabListSize = 0;
+            if(albumsRemaining < 50) {
+                toGrabListSize = albumsRemaining;
+                albumsRemaining = 0;
+            } else {
+                toGrabListSize = 50;
+                albumsRemaining -= 50;
+            }
+
+            GetSeveralAlbumsRequest severalAlbumsRequest;
+            severalAlbumsRequest = spotifyApi.getSeveralAlbums(
+                    (String[]) albumIdsList.subList(albumsRetrieved, albumsRetrieved + toGrabListSize).toArray()
+            ).build();
+
+            try {
+                Album[] fullAlbums = severalAlbumsRequest.execute();
+                Collections.addAll(returnList, fullAlbums);
+            } catch (TooManyRequestsException e ) {
+                int retryAfter = e.getRetryAfter();
+                try {
+                    Thread.sleep((retryAfter + 1) * 1000);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+                getOrderedArtistReleases(artistId);
+            } catch (IOException | SpotifyWebApiException e ) {
+                e.printStackTrace();
+            }
+
+        }
+
+        // Finally, sort the list by releaseDate
+        returnList.sort(new Comparator<Album>() {
+            @Override
+            public int compare(Album a1, Album a2) {
+                // Turn the release dates of both albums into LocalDate objects
+                LocalDateTime a1Release = LocalDateTime.parse(a1.getReleaseDate());
+                LocalDateTime a2Release = LocalDateTime.parse(a2.getReleaseDate());
+
+                if (a1Release.equals(a2Release))
+                    return 0;
+                return a1Release.isBefore(a2Release) ? -1 : 1;
+            }
+        });
+
+
+        return returnList;
     }
 
     public String followArtist(String artistName, String userId) {

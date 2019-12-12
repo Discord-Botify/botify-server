@@ -6,6 +6,7 @@ import com.rotunomp.discordBot.app.SessionFactoryInstance;
 import com.rotunomp.discordBot.models.FollowedArtist;
 import com.rotunomp.discordBot.models.AppUser;
 import com.rotunomp.discordBot.services.SpotifyService;
+import com.wrapper.spotify.model_objects.specification.Album;
 import com.wrapper.spotify.model_objects.specification.AlbumSimplified;
 import com.wrapper.spotify.model_objects.specification.Artist;
 import net.dv8tion.jda.api.JDA;
@@ -82,16 +83,11 @@ public class AlbumNotificationThread extends Thread {
             for (Artist apiArtist : apiArtists) {
                 FollowedArtist dbArtist =
                         dbArtistAlbumCountMap.get(apiArtist.getId());
-                List<AlbumSimplified> albumList =
-                        spotifyService.getArtistsAlbums(apiArtist.getId());
+                List<Album> albumList =
+                        spotifyService.getOrderedArtistReleases(apiArtist.getId());
                 // If the apiArtist's album list is longer than our saved album list
                 // we need to send the notification!
                 if (albumList.size() > dbArtist.getAlbumCount()) {
-                    // Sort the albumList such that the latest release is the first
-                    // This is necessary because the API always places albums at the top
-                    // even though we grab singles, EPs too
-                    sortAlbumsByReleaseDate(albumList);
-
                     // Send the notification to all of the followers!
                     for (AppUser user : dbArtist.getFollowers()) {
                         System.out.println("Follower of " + dbArtist.getName() + ": " + user.getDiscordId());
@@ -122,9 +118,9 @@ public class AlbumNotificationThread extends Thread {
 
     }
 
-    private void sendAlbumUpdateNotification(List<AlbumSimplified> albums, String userId, String artistName) throws LoginException {
+    private void sendAlbumUpdateNotification(List<Album> albums, String userId, String artistName) throws LoginException {
         // Figure out the most recent album
-        AlbumSimplified mostRecentAlbum = albums.get(0);
+        Album mostRecentAlbum = albums.get(0);
         // Construct the message we want to send
         StringBuilder str = new StringBuilder();
         str.append("New ")
