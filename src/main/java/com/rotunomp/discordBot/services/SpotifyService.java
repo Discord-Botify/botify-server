@@ -236,6 +236,7 @@ public class SpotifyService {
         }
 
         // Finally, sort the list by releaseDate
+        System.out.println("Trying to sort this artist's albums: " + artistId);
         returnList.sort((a1, a2) -> {
             // Turn the release dates of both albums into LocalDate objects
 //            DateTimeFormatterBuilder builder = new DateTimeFormatterBuilder()
