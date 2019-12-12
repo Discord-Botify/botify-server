@@ -17,6 +17,8 @@ import org.hibernate.exception.JDBCConnectionException;
 
 import javax.security.auth.login.LoginException;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -85,6 +87,11 @@ public class AlbumNotificationThread extends Thread {
                 // If the apiArtist's album list is longer than our saved album list
                 // we need to send the notification!
                 if (albumList.size() > dbArtist.getAlbumCount()) {
+                    // Sort the albumList such that the latest release is the first
+                    // This is necessary because the API always places albums at the top
+                    // even though we grab singles, EPs too
+                    sortAlbumsByReleaseDate(albumList);
+
                     // Send the notification to all of the followers!
                     for (AppUser user : dbArtist.getFollowers()) {
                         System.out.println("Follower of " + dbArtist.getName() + ": " + user.getDiscordId());
@@ -132,4 +139,18 @@ public class AlbumNotificationThread extends Thread {
         DiscordPrivateMessenger.sendMessage(str.toString(), userId);
     }
 
+    private void sortAlbumsByReleaseDate(List<AlbumSimplified> albumList) {
+        albumList.sort(new Comparator<AlbumSimplified>() {
+            @Override
+            public int compare(AlbumSimplified a1, AlbumSimplified a2) {
+                // Turn the release dates of both albums into LocalDate objects
+                LocalDateTime a1Release = LocalDateTime.parse(a1.getReleaseDate());
+                LocalDateTime a2Release = LocalDateTime.parse(a2.getReleaseDate());
+
+                if (a1Release.equals(a2Release))
+                    return 0;
+                return a1Release.isBefore(a2Release) ? -1 : 1;
+            }
+        });
+    }
 }
