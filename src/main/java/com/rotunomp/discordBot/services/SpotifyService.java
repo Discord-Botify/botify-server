@@ -196,18 +196,21 @@ public class SpotifyService {
 
         // Loop that list
         while(albumsRemaining > 0) {
-            int toGrabListSize = 0;
-            if(albumsRemaining < 50) {
+            int toGrabListSize;
+            if(albumsRemaining < 20) {
                 toGrabListSize = albumsRemaining;
                 albumsRemaining = 0;
             } else {
-                toGrabListSize = 50;
-                albumsRemaining -= 50;
+                toGrabListSize = 20;
+                albumsRemaining -= 20;
             }
 
             GetSeveralAlbumsRequest severalAlbumsRequest;
+            String[] albumIdsArray =
+                    albumIdsList.subList(albumsRetrieved, albumsRetrieved + toGrabListSize)
+                            .toArray(new String[20]);
             severalAlbumsRequest = spotifyApi.getSeveralAlbums(
-                    albumIdsList.subList(albumsRetrieved, albumsRetrieved + toGrabListSize).toArray(new String[50])
+                    albumIdsArray
             ).build();
 
             try {
