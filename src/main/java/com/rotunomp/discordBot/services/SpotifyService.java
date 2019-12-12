@@ -193,7 +193,6 @@ public class SpotifyService {
         for (AlbumSimplified albumSimplified : simpleAlbums) {
             albumIdsList.add(albumSimplified.getId());
         }
-        String[] albumIds = (String[]) albumIdsList.toArray();
 
         // Loop that list
         while(albumsRemaining > 0) {
@@ -208,7 +207,7 @@ public class SpotifyService {
 
             GetSeveralAlbumsRequest severalAlbumsRequest;
             severalAlbumsRequest = spotifyApi.getSeveralAlbums(
-                    (String[]) albumIdsList.subList(albumsRetrieved, albumsRetrieved + toGrabListSize).toArray()
+                    albumIdsList.subList(albumsRetrieved, albumsRetrieved + toGrabListSize).toArray(new String[50])
             ).build();
 
             try {
