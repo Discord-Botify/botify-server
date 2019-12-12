@@ -213,13 +213,14 @@ public class SpotifyService {
             GetSeveralAlbumsRequest severalAlbumsRequest;
             String[] albumIdsArray =
                     albumIdsList.subList(albumsRetrieved, albumsRetrieved + toGrabListSize)
-                            .toArray(new String[20]);
+                            .toArray(new String[toGrabListSize]);
             severalAlbumsRequest = spotifyApi.getSeveralAlbums(
                     albumIdsArray
             ).build();
 
             try {
                 Album[] fullAlbums = severalAlbumsRequest.execute();
+                System.out.println("Array retrieved size: " + fullAlbums.length);
                 for (Album album : fullAlbums) {
                     System.out.println("Adding this album to the returnList: " + album.getName());
                 }
