@@ -274,7 +274,8 @@ public class SpotifyService {
                     a1Release = LocalDate.parse(a1.getReleaseDate(), yearMonth);
                 }
                 else {
-                    a1Release = LocalDate.parse(a1.getReleaseDate(), year);
+                    a1Release = LocalDate.of(Integer.parseInt(a1.getReleaseDate()), 12, 31);
+//                    a1Release = LocalDate.parse(a1.getReleaseDate(), year);
                 }
 
                 if (a2.getReleaseDatePrecision() == ReleaseDatePrecision.DAY) {
@@ -284,7 +285,7 @@ public class SpotifyService {
                     a2Release = LocalDate.parse(a2.getReleaseDate(), yearMonth);
                 }
                 else {
-                    a2Release = LocalDate.parse(a2.getReleaseDate(), year);
+                    a2Release = LocalDate.of(Integer.parseInt(a2.getReleaseDate()), 12, 31);
                 }
 
                 try {
