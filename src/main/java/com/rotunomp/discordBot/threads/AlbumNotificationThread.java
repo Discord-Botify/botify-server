@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.entities.User;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.exception.JDBCConnectionException;
 
 import javax.security.auth.login.LoginException;
 import java.time.LocalDateTime;
@@ -36,7 +37,7 @@ public class AlbumNotificationThread extends Thread {
         LocalDateTime timeSinceLastUpdate = LocalDateTime.now().minusMinutes(minutesPerUpdate);
         while (true) {
             LocalDateTime currentTime = LocalDateTime.now();
-            if(timeSinceLastUpdate.isBefore(currentTime.minusMinutes(minutesPerUpdate))) {
+            if (timeSinceLastUpdate.isBefore(currentTime.minusMinutes(minutesPerUpdate))) {
                 System.out.println("Beginning the album notification process");
                 startNotifyProcess();
                 timeSinceLastUpdate = currentTime;
@@ -83,7 +84,7 @@ public class AlbumNotificationThread extends Thread {
                         spotifyService.getArtistsAlbums(apiArtist.getId());
                 // If the apiArtist's album list is longer than our saved album list
                 // we need to send the notification!
-                if(albumList.size() > dbArtist.getAlbumCount()) {
+                if (albumList.size() > dbArtist.getAlbumCount()) {
                     // Send the notification to all of the followers!
                     for (AppUser user : dbArtist.getFollowers()) {
                         System.out.println("Follower of " + dbArtist.getName() + ": " + user.getDiscordId());
@@ -101,8 +102,12 @@ public class AlbumNotificationThread extends Thread {
             // Commit all our DB changes and we're done! Whew.
             tx.commit();
             System.out.println("Album notification cycle complete!");
+        } catch (JDBCConnectionException e) {
+            // database connection dropped, it will reset automatically
+            System.err.println("Database connection closed. Restarting the album notification process.");
+            startNotifyProcess();
         } catch (Exception e) {
-            if (tx!=null) tx.rollback();
+            if (tx != null) tx.rollback();
             e.printStackTrace();
         } finally {
             session.close();
@@ -116,13 +121,13 @@ public class AlbumNotificationThread extends Thread {
         // Construct the message we want to send
         StringBuilder str = new StringBuilder();
         str.append("New ")
-        .append(mostRecentAlbum.getAlbumType().type)
-        .append(" from ")
-        .append(artistName)
-        .append(" : ")
-        .append(mostRecentAlbum.getName())
-        .append(" | https://open.spotify.com/album/")
-        .append(mostRecentAlbum.getId());
+                .append(mostRecentAlbum.getAlbumType().type)
+                .append(" from ")
+                .append(artistName)
+                .append(" : ")
+                .append(mostRecentAlbum.getName())
+                .append(" | https://open.spotify.com/album/")
+                .append(mostRecentAlbum.getId());
 
         DiscordPrivateMessenger.sendMessage(str.toString(), userId);
     }
