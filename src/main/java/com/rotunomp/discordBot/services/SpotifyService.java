@@ -44,6 +44,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.chrono.ChronoLocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
 import java.util.*;
@@ -235,22 +236,21 @@ public class SpotifyService {
         }
 
         // Finally, sort the list by releaseDate
-        returnList.sort(new Comparator<Album>() {
-            @Override
-            public int compare(Album a1, Album a2) {
-                // Turn the release dates of both albums into LocalDate objects
-                DateTimeFormatterBuilder builder = new DateTimeFormatterBuilder()
-                        .parseDefaulting(ChronoField.YEAR_OF_ERA, 2016L)
-                        .appendPattern("[yyyy-MM-dd]")
-                        .appendPattern("[yyyy-MM]")
-                        .appendPattern("[yyyy]");
-                LocalDate a1Release = LocalDate.parse(a1.getReleaseDate(), builder.toFormatter(Locale.ENGLISH));
-                LocalDate a2Release = LocalDate.parse(a2.getReleaseDate(), builder.toFormatter(Locale.ENGLISH));
+        returnList.sort((a1, a2) -> {
+            // Turn the release dates of both albums into LocalDate objects
+            DateTimeFormatterBuilder builder = new DateTimeFormatterBuilder()
+                    .parseLenient().parseCaseInsensitive()
+                    .parseDefaulting(ChronoField.YEAR_OF_ERA, 2016L)
+                    .appendPattern("[yyyy-MM-dd]")
+                    .appendPattern("[yyyy-MM]")
+                    .appendPattern("[yyyy]");
+            DateTimeFormatter formatter = builder.toFormatter(Locale.ENGLISH);
+            LocalDate a1Release = LocalDate.parse(a1.getReleaseDate(), formatter);
+            LocalDate a2Release = LocalDate.parse(a2.getReleaseDate(), formatter);
 
-                if (a1Release.equals(a2Release))
-                    return 0;
-                return a1Release.isBefore(a2Release) ? -1 : 1;
-            }
+            if (a1Release.equals(a2Release))
+                return 0;
+            return a1Release.isBefore(a2Release) ? -1 : 1;
         });
 
 
