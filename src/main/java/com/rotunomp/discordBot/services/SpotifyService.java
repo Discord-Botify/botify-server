@@ -41,6 +41,7 @@ import org.hibernate.query.Query;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.Executor;
@@ -235,8 +236,8 @@ public class SpotifyService {
             @Override
             public int compare(Album a1, Album a2) {
                 // Turn the release dates of both albums into LocalDate objects
-                LocalDateTime a1Release = LocalDateTime.parse(a1.getReleaseDate());
-                LocalDateTime a2Release = LocalDateTime.parse(a2.getReleaseDate());
+                LocalDate a1Release = LocalDate.parse(a1.getReleaseDate());
+                LocalDate a2Release = LocalDate.parse(a2.getReleaseDate());
 
                 if (a1Release.equals(a2Release))
                     return 0;
