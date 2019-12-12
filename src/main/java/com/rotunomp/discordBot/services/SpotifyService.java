@@ -6,9 +6,11 @@ import com.rotunomp.discordBot.app.SessionFactoryInstance;
 import com.rotunomp.discordBot.exceptions.ArtistNotFoundException;
 import com.rotunomp.discordBot.models.FollowedArtist;
 import com.rotunomp.discordBot.models.AppUser;
+import com.rotunomp.discordBot.threads.AlbumNotificationThread;
 import com.rotunomp.discordBot.threads.TokenRefreshThread;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.enums.ModelObjectType;
+import com.wrapper.spotify.enums.ReleaseDatePrecision;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.exceptions.detailed.TooManyRequestsException;
 import com.wrapper.spotify.model_objects.credentials.ClientCredentials;
@@ -241,25 +243,51 @@ public class SpotifyService {
 
         // Finally, sort the list by releaseDate
         System.out.println("Trying to sort this artist's albums: " + artistId);
+        sortAlbumList(returnList);
         for (Album album : returnList) {
             System.out.println("Album in list: " + album.getName());
         }
-        returnList.sort(new Comparator<Album>() {
+
+
+
+
+
+        return returnList;
+    }
+
+    private void sortAlbumList(List<Album> albumList) {
+        DateTimeFormatter yearMonthDay = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter yearMonth = DateTimeFormatter.ofPattern("yyyy-MM");
+        DateTimeFormatter year = DateTimeFormatter.ofPattern("yyyy");
+
+        albumList.sort(new Comparator<Album>() {
             @Override
             public int compare(Album a1, Album a2) {
                 // Turn the release dates of both albums into LocalDate objects
-//            DateTimeFormatterBuilder builder = new DateTimeFormatterBuilder()
-//                    .parseLenient().parseCaseInsensitive()
-//                    .parseDefaulting(ChronoField.YEAR_OF_ERA, 2016L)
-//                    .appendPattern("[yyyy-MM-dd]")
-//                    .appendPattern("[yyyy-MM]")
-//                    .appendPattern("[yyyy]");
-//            DateTimeFormatter formatter = builder.toFormatter(Locale.ENGLISH);
                 LocalDate a1Release = null;
                 LocalDate a2Release = null;
+
+                if (a1.getReleaseDatePrecision() == ReleaseDatePrecision.DAY) {
+                    a1Release = LocalDate.parse(a1.getReleaseDate(), yearMonthDay);
+                }
+                else if (a1.getReleaseDatePrecision() == ReleaseDatePrecision.MONTH) {
+                    a1Release = LocalDate.parse(a1.getReleaseDate(), yearMonth);
+                }
+                else {
+                    a1Release = LocalDate.parse(a1.getReleaseDate(), year);
+                }
+
+                if (a2.getReleaseDatePrecision() == ReleaseDatePrecision.DAY) {
+                    a2Release = LocalDate.parse(a2.getReleaseDate(), yearMonthDay);
+                }
+                else if (a2.getReleaseDatePrecision() == ReleaseDatePrecision.MONTH) {
+                    a2Release = LocalDate.parse(a2.getReleaseDate(), yearMonth);
+                }
+                else {
+                    a2Release = LocalDate.parse(a2.getReleaseDate(), year);
+                }
+
                 try {
-                    a1Release = LocalDate.parse(a1.getReleaseDate());
-                    a2Release = LocalDate.parse(a2.getReleaseDate());
                     if (a1Release.equals(a2Release)) {
                         return 0;
                     }
@@ -272,8 +300,6 @@ public class SpotifyService {
             }
         });
 
-
-        return returnList;
     }
 
     public String followArtist(String artistName, String userId) {
