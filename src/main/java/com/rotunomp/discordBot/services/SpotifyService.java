@@ -238,18 +238,18 @@ public class SpotifyService {
         // Finally, sort the list by releaseDate
         returnList.sort((a1, a2) -> {
             // Turn the release dates of both albums into LocalDate objects
-            DateTimeFormatterBuilder builder = new DateTimeFormatterBuilder()
-                    .parseLenient().parseCaseInsensitive()
-                    .parseDefaulting(ChronoField.YEAR_OF_ERA, 2016L)
-                    .appendPattern("[yyyy-MM-dd]")
-                    .appendPattern("[yyyy-MM]")
-                    .appendPattern("[yyyy]");
-            DateTimeFormatter formatter = builder.toFormatter(Locale.ENGLISH);
+//            DateTimeFormatterBuilder builder = new DateTimeFormatterBuilder()
+//                    .parseLenient().parseCaseInsensitive()
+//                    .parseDefaulting(ChronoField.YEAR_OF_ERA, 2016L)
+//                    .appendPattern("[yyyy-MM-dd]")
+//                    .appendPattern("[yyyy-MM]")
+//                    .appendPattern("[yyyy]");
+//            DateTimeFormatter formatter = builder.toFormatter(Locale.ENGLISH);
             LocalDate a1Release = null;
             LocalDate a2Release = null;
             try {
-                a1Release = LocalDate.parse(a1.getReleaseDate(), formatter);
-                a2Release = LocalDate.parse(a2.getReleaseDate(), formatter);
+                a1Release = LocalDate.parse(a1.getReleaseDate());
+                a2Release = LocalDate.parse(a2.getReleaseDate());
                 if (a1Release.equals(a2Release))
                     return 0;
                 return a1Release.isBefore(a2Release) ? -1 : 1;
