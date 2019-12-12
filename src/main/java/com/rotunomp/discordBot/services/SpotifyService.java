@@ -222,10 +222,6 @@ public class SpotifyService {
 
             try {
                 Album[] fullAlbums = severalAlbumsRequest.execute();
-                System.out.println("Array retrieved size: " + fullAlbums.length);
-                for (Album album : fullAlbums) {
-                    System.out.println("Adding this album to the returnList: " + album.getName());
-                }
                 Collections.addAll(returnList, fullAlbums);
             } catch (TooManyRequestsException e ) {
                 int retryAfter = e.getRetryAfter();
@@ -242,15 +238,7 @@ public class SpotifyService {
         }
 
         // Finally, sort the list by releaseDate
-        System.out.println("Trying to sort this artist's albums: " + artistId);
         sortAlbumList(returnList);
-        for (Album album : returnList) {
-            System.out.println("Album in list: " + album.getName());
-        }
-
-
-
-
 
         return returnList;
     }
@@ -275,7 +263,6 @@ public class SpotifyService {
                 }
                 else {
                     a1Release = LocalDate.of(Integer.parseInt(a1.getReleaseDate()), 12, 31);
-//                    a1Release = LocalDate.parse(a1.getReleaseDate(), year);
                 }
 
                 if (a2.getReleaseDatePrecision() == ReleaseDatePrecision.DAY) {
@@ -292,7 +279,7 @@ public class SpotifyService {
                     if (a1Release.equals(a2Release)) {
                         return 0;
                     }
-                    return a1Release.isBefore(a2Release) ? -1 : 1;
+                    return a1Release.isAfter(a2Release) ? -1 : 1;
 
                 } catch (Exception e) {
                     System.err.println("Could not parse " + a1.getReleaseDate());
