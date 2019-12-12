@@ -220,6 +220,9 @@ public class SpotifyService {
 
             try {
                 Album[] fullAlbums = severalAlbumsRequest.execute();
+                for (Album album : fullAlbums) {
+                    System.out.println("Adding this album to the returnList: " + album.getName());
+                }
                 Collections.addAll(returnList, fullAlbums);
             } catch (TooManyRequestsException e ) {
                 int retryAfter = e.getRetryAfter();
@@ -237,6 +240,9 @@ public class SpotifyService {
 
         // Finally, sort the list by releaseDate
         System.out.println("Trying to sort this artist's albums: " + artistId);
+        for (Album album : returnList) {
+            System.out.println("Album in list: " + album.getName());
+        }
         returnList.sort(new Comparator<Album>() {
             @Override
             public int compare(Album a1, Album a2) {
