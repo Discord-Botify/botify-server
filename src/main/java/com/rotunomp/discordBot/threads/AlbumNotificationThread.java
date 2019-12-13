@@ -96,6 +96,7 @@ public class AlbumNotificationThread extends Thread {
                     // Also update the albumCount in the database
                     dbArtist.setAlbumCount(albumList.size());
                     session.update(dbArtist);
+                    tx.commit();
                 }
                 // Let's sleep the thread for a bit. This will both speed up other
                 // operations and reduce the hit on our rate limit
