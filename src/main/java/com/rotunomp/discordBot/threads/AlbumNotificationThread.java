@@ -61,7 +61,6 @@ public class AlbumNotificationThread extends Thread {
         Transaction tx = null;
 
         try {
-            tx = session.beginTransaction();
 
             // Get artists from DB
             List<FollowedArtist> dbArtists =
@@ -93,6 +92,7 @@ public class AlbumNotificationThread extends Thread {
                         System.out.println("Follower of " + dbArtist.getName() + ": " + user.getDiscordId());
                         sendAlbumUpdateNotification(albumList, user.getDiscordId(), apiArtist.getName());
                     }
+                    tx = session.beginTransaction();
                     // Also update the albumCount in the database
                     dbArtist.setAlbumCount(albumList.size());
                     session.update(dbArtist);
@@ -103,8 +103,6 @@ public class AlbumNotificationThread extends Thread {
                 Thread.sleep(500);
             }
 
-            // Commit all our DB changes and we're done! Whew.
-            tx.commit();
             System.out.println("Album notification cycle complete!");
         } catch (JDBCConnectionException e) {
             // database connection dropped, it will reset automatically
