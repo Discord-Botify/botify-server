@@ -402,6 +402,9 @@ public class SpotifyService {
                 e.printStackTrace();
             }
         } catch(TooManyRequestsException e) {
+            if (tx != null) {
+                tx.rollback();
+            }
             System.out.println("Waiting for the rate limit to chill");
             int retryAfter = e.getRetryAfter();
             System.out.println("retrying after " + retryAfter + " seconds");
