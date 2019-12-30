@@ -5,6 +5,7 @@ import com.rotunomp.discordBot.operations.FunctionName;
 import com.rotunomp.discordBot.operations.FunctionType;
 import com.rotunomp.discordBot.services.PingService;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 public class ServerListener extends AbstractListener {
@@ -65,6 +66,15 @@ public class ServerListener extends AbstractListener {
                     break;
             }
         }
+
+    }
+
+    // When a member joins, send them a welcome message
+    public void onGuildMemberJoin(GuildMemberJoinEvent event) {
+        User newMember = event.getMember().getUser();
+        newMember.openPrivateChannel().queue((channel) -> {
+            channel.sendMessage("Welcome to Botify! Type !help to see Discord commands").queue();
+        });
 
     }
 
