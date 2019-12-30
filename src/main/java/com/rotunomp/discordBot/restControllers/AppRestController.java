@@ -110,9 +110,7 @@ public class AppRestController {
          *      ]
          *   }
          */
-        get(
-                "/users/follow/:sessionId",
-                (request, response) -> {
+        get("/users/follow/:sessionId", (request, response) -> {
                     String discordId = appSessionService.getDiscordIdFromSessionId(
                             request.params(":sessionId")
                     );
@@ -132,9 +130,7 @@ public class AppRestController {
          *
          *   Response: 201
          */
-        post(
-                "/users/follow/:sessionId/:artistId",
-                (request, response) -> {
+        post("/users/follow/:sessionId/:artistId", (request, response) -> {
                     String discordId = appSessionService.getDiscordIdFromSessionId(
                             request.params(":sessionId")
                     );
@@ -157,9 +153,7 @@ public class AppRestController {
          *
          *   Response: 204
          */
-        delete(
-                "/users/follow/:sessionId/:artistId",
-                (request, response) -> {
+        delete("/users/follow/:sessionId/:artistId", (request, response) -> {
                     String discordId = appSessionService.getDiscordIdFromSessionId(
                             request.params(":sessionId")
                     );

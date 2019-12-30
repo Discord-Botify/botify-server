@@ -108,19 +108,40 @@ public class SpotifyService {
         try {
             Album album = request.execute();
             return album.getName();
+        } catch(TooManyRequestsException e) {
+            System.out.println("Waiting for the rate limit to chill");
+            int retryAfter = e.getRetryAfter();
+            System.out.println("retrying after " + retryAfter + " seconds");
+            try {
+                Thread.sleep((retryAfter + 1) * 1000);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+            // Restart method
+            return getAlbumNameById(albumId);
         } catch (Exception e) {
+            // TODO: log error
             e.printStackTrace();
         }
 
         return "Cannot find album: " + albumId;
     }
 
-    public List<Artist> searchArtistsByName(String artistName, int listSize) throws ArtistNotFoundException, IOException {
+    public List<Artist> searchArtistsByName(String artistName, int listSize) throws IOException, SpotifyWebApiException {
         SearchArtistsRequest request = spotifyApi.searchArtists(artistName).limit(listSize).build();
         try {
             return Arrays.asList(request.execute().getItems());
-        } catch (SpotifyWebApiException e) {
-            throw new ArtistNotFoundException();
+        } catch(TooManyRequestsException e) {
+            System.out.println("Waiting for the rate limit to chill");
+            int retryAfter = e.getRetryAfter();
+            System.out.println("retrying after " + retryAfter + " seconds");
+            try {
+                Thread.sleep((retryAfter + 1) * 1000);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+            // Restart method
+            return searchArtistsByName(artistName, listSize);
         }
     }
 
@@ -141,10 +162,7 @@ public class SpotifyService {
             }
             return stringBuilder.toString();
 
-        } catch (ArtistNotFoundException e) {
-            e.printStackTrace();
-            return "Could not find the specified artist";
-        } catch (IOException e) {
+        } catch (IOException | SpotifyWebApiException e) {
             e.printStackTrace();
             return "Something went wrong. Try again later!";
         }
@@ -177,6 +195,17 @@ public class SpotifyService {
                 albums.addAll(nextFiftyAlbums);
             }
             return albums;
+        } catch(TooManyRequestsException e) {
+            System.out.println("Waiting for the rate limit to chill");
+            int retryAfter = e.getRetryAfter();
+            System.out.println("retrying after " + retryAfter + " seconds");
+            try {
+                Thread.sleep((retryAfter + 1) * 1000);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+            // Restart method
+            return getArtistsAlbums(artistId);
         } catch (IOException | SpotifyWebApiException e) {
             e.printStackTrace();
         }
@@ -349,7 +378,7 @@ public class SpotifyService {
         return "Failure adding" + artistName;
     }
 
-    public String followArtistById(String artistId, String userId) throws InterruptedException {
+    public String followArtistById(String artistId, String userId) throws InterruptedException, IOException, SpotifyWebApiException {
         Session session = sessionFactory.openSession();
         Transaction tx = null;
 
@@ -398,7 +427,6 @@ public class SpotifyService {
                 // Restart the method
                 return followArtistById(artistId, userId);
             } else {
-                System.out.println("The error code was " + errorCode);
                 e.printStackTrace();
             }
         } catch(TooManyRequestsException e) {
@@ -414,7 +442,7 @@ public class SpotifyService {
             if (tx != null) {
                 session.getTransaction().rollback();
             }
-            e.printStackTrace();
+            throw e;
         } finally {
             session.close();
         }
@@ -448,6 +476,17 @@ public class SpotifyService {
             }
             try {
                 returnList.addAll(Arrays.asList(artistsRequest.execute()));
+            } catch(TooManyRequestsException e) {
+                System.out.println("Waiting for the rate limit to chill");
+                int retryAfter = e.getRetryAfter();
+                System.out.println("retrying after " + retryAfter + " seconds");
+                try {
+                    Thread.sleep((retryAfter + 1) * 1000);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+                // Restart method
+                return getArtistList(artists);
             } catch (IOException | SpotifyWebApiException e) {
                 e.printStackTrace();
             }
@@ -473,7 +512,7 @@ public class SpotifyService {
 
     public List<FollowedArtist> getFollowedArtistsListForDiscordId(String userId) {
         Set<FollowedArtist> followedArtists = getFollowedArtistsForDiscordUser(userId);
-        List<FollowedArtist> followedArtistList = new ArrayList<FollowedArtist>();
+        List<FollowedArtist> followedArtistList = new ArrayList<>();
 
         for (FollowedArtist artist : followedArtists) {
             followedArtistList.add(artist);
@@ -646,15 +685,19 @@ public class SpotifyService {
 
     // This method grabs all of the followed artists from the Spotify API
     // for a particular user
-    public List<FollowedArtist> followAllArtistsFollowedOnSpotify(AppUser appUser) throws IOException, SpotifyWebApiException {
-        // Start by getting a new access token for the AppUser
-        String accessToken = refreshSpotifyToken(appUser.getSpotifyRefreshToken());
+    public List<FollowedArtist> followAllArtistsFollowedOnSpotify(AppUser appUser) {
+        try {
+            // Start by getting a new access token for the AppUser
+            String accessToken = refreshSpotifyToken(appUser.getSpotifyRefreshToken());
 
-        // Use that access token to grab the user's followed artists on Spotify
-        List<Artist> spotifyFollowedArtists = getUsersSpotifyFollowedArtists(accessToken);
+            // Use that access token to grab the user's followed artists on Spotify
+            List<Artist> spotifyFollowedArtists = getUsersSpotifyFollowedArtists(accessToken);
 
-        // Save all those artists in the database
-        followAllArtists(spotifyFollowedArtists, appUser.getDiscordId());
+            // Save all those artists in the database
+            followAllArtists(spotifyFollowedArtists, appUser.getDiscordId());
+        } catch (IOException | SpotifyWebApiException e) {
+            e.printStackTrace();
+        }
 
         return null;
     }
@@ -685,7 +728,6 @@ public class SpotifyService {
 
         return new UrlEncodedFormEntity(params, Consts.UTF_8);
     }
-
 
     private List<Artist> getUsersSpotifyFollowedArtists(String accessToken) throws IOException, SpotifyWebApiException {
         // It's just easier to use the API wrapper for this call
@@ -729,7 +771,7 @@ public class SpotifyService {
 
     }
 
-    private void followAllArtists(List<Artist> artists, String discordId) {
+    private void followAllArtists(List<Artist> artists, String discordId) throws IOException, SpotifyWebApiException {
         for (Artist artist : artists) {
             try {
                 followArtistById(artist.getId(), discordId);
