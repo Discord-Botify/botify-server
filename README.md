@@ -26,3 +26,4 @@ Of course, it's a lot more complicated than that, but that's how it works genera
 
 ## Architecture
 
+![Imgur](https://i.imgur.com/aQR5sry.png)
