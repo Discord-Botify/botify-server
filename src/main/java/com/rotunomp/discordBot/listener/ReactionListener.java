@@ -1,9 +1,12 @@
 package com.rotunomp.discordBot.listener;
 
 import com.rotunomp.discordBot.services.SpotifyService;
+import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import net.dv8tion.jda.api.events.message.priv.react.PrivateMessageReactionAddEvent;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+
+import java.io.IOException;
 
 public class ReactionListener extends ListenerAdapter {
     private String artist;
@@ -41,7 +44,7 @@ public class ReactionListener extends ListenerAdapter {
                 artistId = split[1].split(" \\| ID: ")[1];
                 try {
                     responseMessage = spotifyService.followArtistById(artistId, user.getId());
-                } catch (InterruptedException e) {
+                } catch (InterruptedException | IOException | SpotifyWebApiException e) {
                     e.printStackTrace();
                 }
                 channel.sendMessage(responseMessage).queue();
@@ -50,7 +53,7 @@ public class ReactionListener extends ListenerAdapter {
                 artistId = split[2].split(" \\| ID: ")[1];
                 try {
                     responseMessage = spotifyService.followArtistById(artistId, user.getId());
-                } catch (InterruptedException e) {
+                } catch (InterruptedException | IOException | SpotifyWebApiException e) {
                     e.printStackTrace();
                 }
                 channel.sendMessage(responseMessage).queue();
@@ -59,7 +62,7 @@ public class ReactionListener extends ListenerAdapter {
                 artistId = split[3].split(" \\| ID: ")[1];
                 try {
                     responseMessage = spotifyService.followArtistById(artistId, user.getId());
-                } catch (InterruptedException e) {
+                } catch (InterruptedException | IOException | SpotifyWebApiException e) {
                     e.printStackTrace();
                 }
                 channel.sendMessage(responseMessage).queue();
