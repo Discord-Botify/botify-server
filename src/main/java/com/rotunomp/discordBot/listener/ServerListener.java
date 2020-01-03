@@ -1,6 +1,5 @@
 package com.rotunomp.discordBot.listener;
 
-import com.rotunomp.discordBot.apiWrappers.PokemonApiWrapper;
 import com.rotunomp.discordBot.operations.FunctionName;
 import com.rotunomp.discordBot.operations.FunctionType;
 import com.rotunomp.discordBot.services.PingService;
