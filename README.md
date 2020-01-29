@@ -18,5 +18,5 @@ This application started as a Discord bot which would notify you when an artist 
 4. If the number we pulled from Spotify is greater than the one we previously had, the artist uploaded something new! We notify the user acordingly
 
 
-Of course, it's a lot more complicated than that, but that's how it works generally. 
+Of course, it's a lot more complicated than that, but that's how it works generally. Visualizations of how the application works can be found in the [project-diagrams repository](https://github.com/Discord-Botify/project-diagrams).
 
