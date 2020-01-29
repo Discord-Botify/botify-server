@@ -10,11 +10,7 @@ Well I'm not trying to reinvent the wheel! Our Discord bot uses Discord's own bo
 ## Sounds about normal, what's cool about it though?
 If you're here to learn something new about Discord bots or the Spotify API, take a look through our code. If you're here as an employer (*wink, wink*) I'm glad to have you as well. Either way, keep reading for a more in-depth look at how it all works
 
-
-# How it all works
-Let's talk about purpose, architecture, and some other stuff
-
-## Purpose
+# Purpose
 This application started as a Discord bot which would notify you when an artist you like uploaded an album. It uses Spotify's database and API to accomplish this. **Spotify does not do this themselves.** So what does that mean for us? We have to patch together what Spotify *does* provide us to make it all work. In essence, we have to:
 1. Save a user's list of artists they want to follow
 2. Every few hours, reach out to the Spotify API and get the number of albums for each artist they follow
@@ -24,8 +20,3 @@ This application started as a Discord bot which would notify you when an artist 
 
 Of course, it's a lot more complicated than that, but that's how it works generally. 
 
-## Architecture
-
-![Imgur](https://i.imgur.com/aQR5sry.png)
-
-![Imgur](https://i.imgur.com/RyI4w51.png)
