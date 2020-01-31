@@ -169,5 +169,28 @@ public class AppRestController {
 
         );
 
+        /*   Delete all of a user's followed artists
+         *
+         *   Params: sessionId
+         *
+         *   Request Body Layout: NONE
+         *
+         *   Response: 204
+         */
+        delete("/users/follow/:sessionId/", (request, response) -> {
+                    String discordId = appSessionService.getDiscordIdFromSessionId(
+                            request.params(":sessionId")
+                    );
+
+                    spotifyService.unfollowAllArtists(discordId);
+
+                    response.status(204);
+                    return "";
+                },
+                jsonWithExposeAnnotation()
+
+        );
+
     }
+
 }

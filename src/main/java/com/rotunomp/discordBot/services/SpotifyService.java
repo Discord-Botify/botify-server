@@ -620,6 +620,41 @@ public class SpotifyService {
         return "Successfully unfollowed " + artistName;
     }
 
+    public String unfollowAllArtists(String userId) {
+        Session session = sessionFactory.openSession();
+        Transaction tx = session.beginTransaction();
+
+        try {
+            AppUser user = session.get(AppUser.class, userId);
+            user.setFollowedArtists(new HashSet<FollowedArtist>());
+            session.persist(user);
+            tx.commit();
+        } catch (JDBCException e) {
+            if (tx != null) {
+                session.getTransaction().rollback();
+            }
+            // If the database timed out, call the method again
+            int errorCode = e.getSQLException().getErrorCode();
+            if (errorCode == 2013) {
+                System.out.println("Lost connection to mySQL server, re-establishing connection...");
+                // TODO: Restart the method
+            } else {
+                System.out.println("The error code was " + errorCode);
+                e.printStackTrace();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tx != null) {
+                session.getTransaction().rollback();
+            }
+            return "Could not unfollow all artists";
+        } finally {
+            session.close();
+        }
+
+        return "Successfully unfollowed all artists";
+    }
+
     public List<FollowedArtist> getAllDatabaseArtists() {
         Session session = sessionFactory.openSession();
         try {
