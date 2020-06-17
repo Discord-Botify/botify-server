@@ -5,6 +5,7 @@ import com.rotunomp.discordBot.services.AppSessionService;
 import com.rotunomp.discordBot.services.AppUserService;
 import com.rotunomp.discordBot.services.DiscordService;
 import com.rotunomp.discordBot.services.SpotifyService;
+import spark.Filter;
 
 import static com.rotunomp.discordBot.app.JsonUtil.json;
 import static com.rotunomp.discordBot.app.JsonUtil.jsonWithExposeAnnotation;
@@ -22,6 +23,33 @@ public class AppRestController {
         discordService = DiscordService.getInstance();
         appSessionService = AppSessionService.getInstance();
         appUserService = AppUserService.getInstance();
+        options("/*", (request, response) -> {
+
+            String accessControlRequestHeaders = request.headers("Access-Control-Request-Headers");
+            if (accessControlRequestHeaders != null) {
+                response.header("Access-Control-Allow-Headers", accessControlRequestHeaders);
+            }
+
+            String accessControlRequestMethod = request.headers("Access-Control-Request-Method");
+            if (accessControlRequestMethod != null) {
+                response.header("Access-Control-Allow-Methods", accessControlRequestMethod);
+            }
+
+            return "OK";
+        });
+
+        before((request, response) -> {
+            response.header("Access-Control-Allow-Origin", "*");
+            response.header("Access-Control-Request-Method", "*");
+            response.header("Access-Control-Allow-Headers", "*");
+            // Note: this may or may not be necessary in your particular application
+            response.type("application/json");
+        });
+
+        after((Filter) (request, response) -> {
+            response.header("Access-Control-Allow-Origin", "*");
+            response.header("Access-Control-Allow-Methods", "*");
+        });
 
 
         /*  Exchange an existing sessionId for that user's information
