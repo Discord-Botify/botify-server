@@ -38,6 +38,7 @@ public class RestController {
         });
 
         before((request, response) -> {
+            System.out.println("We're in the before block for Spark");
             response.header("Access-Control-Allow-Origin", "*");
             response.header("Access-Control-Request-Method", "*");
             response.header("Access-Control-Allow-Headers", "*");
@@ -47,7 +48,7 @@ public class RestController {
 
         after((Filter) (request, response) -> {
             response.header("Access-Control-Allow-Origin", "*");
-            response.header("Access-Control-Allow-Methods", "*");
+            response.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
         });
 
         new SpotifyRestController();
