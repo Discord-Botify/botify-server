@@ -19,6 +19,9 @@ public class RestController {
 //        Spark.staticFiles.header("Access-Control-Allow-Origin", "*");
 //	    Spark.staticFiles.header("Access-Control-Allow-Methods", "*");
 
+        Spark.staticFiles.location("/assets");
+        Spark.staticFiles.header("Access-Control-Allow-Origin", "*");
+
         options("/*", (request, response) -> {
 
             String accessControlRequestHeaders = request.headers("Access-Control-Request-Headers");
