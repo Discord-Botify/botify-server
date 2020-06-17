@@ -1,6 +1,7 @@
 package com.rotunomp.discordBot.restControllers;
 
 import com.rotunomp.discordBot.app.Properties;
+import spark.Filter;
 import spark.Spark;
 
 import static spark.Spark.*;
@@ -14,34 +15,36 @@ public class RestController {
         secure(keyStoreLocation, keyStorePassword, null, null);
 
         // Enable CORS for all endpoints
-        Spark.staticFiles.location("/assets");
-        Spark.staticFiles.header("Access-Control-Allow-Origin", "*");
-	Spark.staticFiles.header("Access-Control-Allow-Methods", "*");
+//        Spark.staticFiles.location("/assets");
+//        Spark.staticFiles.header("Access-Control-Allow-Origin", "*");
+//	    Spark.staticFiles.header("Access-Control-Allow-Methods", "*");
 
-        options("/*",
-                (request, response) -> {
+        options("/*", (request, response) -> {
 
-                    String accessControlRequestHeaders = request
-                            .headers("Access-Control-Request-Headers");
-                    if (accessControlRequestHeaders != null) {
-                        response.header("Access-Control-Allow-Headers",
-                                accessControlRequestHeaders);
-                    }
+            String accessControlRequestHeaders = request.headers("Access-Control-Request-Headers");
+            if (accessControlRequestHeaders != null) {
+                response.header("Access-Control-Allow-Headers", accessControlRequestHeaders);
+            }
 
-                    String accessControlRequestMethod = request
-                            .headers("Access-Control-Request-Method");
-                    if (accessControlRequestMethod != null) {
-                        response.header("Access-Control-Allow-Methods",
-                                accessControlRequestMethod);
-                    }
+            String accessControlRequestMethod = request.headers("Access-Control-Request-Method");
+            if (accessControlRequestMethod != null) {
+                response.header("Access-Control-Allow-Methods", accessControlRequestMethod);
+            }
 
-                    return "OK";
-                });
+            return "OK";
+        });
 
         before((request, response) -> {
             response.header("Access-Control-Allow-Origin", "*");
+            response.header("Access-Control-Request-Method", "*");
             response.header("Access-Control-Allow-Headers", "*");
+            // Note: this may or may not be necessary in your particular application
             response.type("application/json");
+        });
+
+        after((Filter) (request, response) -> {
+            response.header("Access-Control-Allow-Origin", "*");
+            response.header("Access-Control-Allow-Methods", "GET");
         });
 
         new SpotifyRestController();
