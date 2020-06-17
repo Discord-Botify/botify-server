@@ -16,6 +16,7 @@ public class RestController {
         // Enable CORS for all endpoints
         Spark.staticFiles.location("/assets");
         Spark.staticFiles.header("Access-Control-Allow-Origin", "*");
+	Spark.staticFiles.header("Access-Control-Allow-Methods", "*");
 
         options("/*",
                 (request, response) -> {
