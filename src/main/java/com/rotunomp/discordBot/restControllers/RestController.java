@@ -19,9 +19,6 @@ public class RestController {
 //        Spark.staticFiles.header("Access-Control-Allow-Origin", "*");
 //	    Spark.staticFiles.header("Access-Control-Allow-Methods", "*");
 
-        Spark.staticFiles.location("/assets");
-        Spark.staticFiles.header("Access-Control-Allow-Origin", "*");
-
         options("/*", (request, response) -> {
 
             String accessControlRequestHeaders = request.headers("Access-Control-Request-Headers");
@@ -46,10 +43,10 @@ public class RestController {
             response.type("application/json");
         });
 
-        after((Filter) (request, response) -> {
-            response.header("Access-Control-Allow-Origin", "*");
-            response.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
-        });
+//        after((Filter) (request, response) -> {
+//            response.header("Access-Control-Allow-Origin", "*");
+//            response.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
+//        });
 
         new SpotifyRestController();
         new OauthRestController();
