@@ -5,7 +5,7 @@ The back-end controlling a Discord Bot and serving a RESTful API to interact wit
 Every internet application needs an API to provide functionality. That's the code in this repository. Our server code handles API requests for our user interfaces, which currently include a website and a text-controlled Discord bot. Also, it manages our application's database
 
 ## Do you use any dependecies?
-Well I'm not trying to reinvent the wheel! Our Discord bot uses Discord's own bot API, called [JDA](https://github.com/DV8FromTheWorld/JDA). Our API is made using [spark-java](http://sparkjava.com/). The last big one is an [API wrapper for Spotify](https://github.com/thelinmichael/spotify-web-api-java). Of course, there's a bunch of other dependencies sprinkled throughout.
+Well I'm not trying to reinvent the wheel! Our Discord bot uses Discord's own bot SDK, called [JDA](https://github.com/DV8FromTheWorld/JDA). Our API is made using [spark-java](http://sparkjava.com/). The last big one is an [API wrapper for Spotify](https://github.com/thelinmichael/spotify-web-api-java). Of course, there's a bunch of other dependencies sprinkled throughout.
 
 ## Sounds about normal, what's cool about it though?
 If you're here to learn something new about Discord bots or the Spotify API, take a look through our code. If you're here as an employer (*wink, wink*) I'm glad to have you as well. Either way, keep reading for a more in-depth look at how it all works
