@@ -10,9 +10,9 @@ public class RestController {
 
     public RestController() {
         // Set up SSL
-//        String keyStoreLocation = Properties.get("ssl_certificate_location");
-//        String keyStorePassword = Properties.get("ssl_password");
-//        secure(keyStoreLocation, keyStorePassword, null, null);
+        String keyStoreLocation = Properties.get("ssl_certificate_location");
+        String keyStorePassword = Properties.get("ssl_password");
+        secure(keyStoreLocation, keyStorePassword, null, null);
 
         // Enable CORS for all endpoints
 //        Spark.staticFiles.location("/assets");
