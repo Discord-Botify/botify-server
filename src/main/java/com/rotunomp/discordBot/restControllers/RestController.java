@@ -4,6 +4,7 @@ import com.rotunomp.discordBot.app.Properties;
 import spark.Filter;
 import spark.Spark;
 
+import static com.rotunomp.discordBot.app.JsonUtil.jsonWithExposeAnnotation;
 import static spark.Spark.*;
 
 public class RestController {
@@ -43,10 +44,16 @@ public class RestController {
             response.type("application/json");
         });
 
-//        after((Filter) (request, response) -> {
-//            response.header("Access-Control-Allow-Origin", "*");
-//            response.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
-//        });
+        after((Filter) (request, response) -> {
+            response.header("Access-Control-Allow-Origin", "*");
+            response.header("Access-Control-Allow-Methods", "GET");
+        });
+
+        // Test endpoint
+        get("/test",
+                (request, response) -> "Hello Botify!",
+                jsonWithExposeAnnotation()
+        );
 
         new SpotifyRestController();
         new OauthRestController();
